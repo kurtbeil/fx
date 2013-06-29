@@ -1,0 +1,10 @@
+*.ex4
+/HIS/*
+/config/*
+/files/*
+/samples/*
+/presets/*
+/logs/*
+/templates/*
+
+
