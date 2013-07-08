@@ -6,5 +6,6 @@
 /presets/*
 /logs/*
 /templates/*
-
+mqlcache.dat
+*.log
 
