@@ -1,0 +1,29 @@
+
+   
+   确保交易成功被执行的方法
+   由于有时由于服务器繁忙，价格变化非常快，ask或bid中已经不是服务器上的最新报价了。
+   这样调用会失败，重做调用前要调用RefreshRates更新报价
+   另外这里最好不用true，可以设定尝试的次数，否则智能交易程序将被挂死
+
+   int ticket;
+   while(true)
+     {
+      ticket=OrderSend(Symbol(),OP_BUY,1.0,Ask,3,0,0,"expert comment",255,0,CLR_NONE);
+      if(ticket<=0)
+        {
+         int error=GetLastError();
+         //---- 资金不足
+         if(error==134) break;
+         //---- 10 秒钟等待
+         Sleep(10000);
+         //---- 刷新价格数据
+         RefreshRates();
+         break;
+        }
+      else
+        {
+         OrderSelect(ticket,SELECT_BY_TICKET);
+         OrderPrint();
+         break;
+        }
+     }
