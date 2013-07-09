@@ -11,6 +11,8 @@
 #property  indicator_color1  Silver
 #property  indicator_color2  Red
 #property  indicator_width1  2
+
+
 //---- indicator parameters
 extern int FastEMA=12;
 extern int SlowEMA=26;
