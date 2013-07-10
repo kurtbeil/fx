@@ -5,9 +5,9 @@
 
 1 只显示当前交易品种 (ok)
 2 不能只执行一次(ok)
-3 查找速度太慢了，算法需要进行优化
-
-
+3 查找速度太慢了，算法需要进行优化 (ok)
+(1) 建立open\close数组时就过滤,非当前交易品种 
+(2) 调用find...History时记录上次调用的返回值,并作为下一次要调用的参数
 */
 
 
@@ -18,14 +18,15 @@
 #property indicator_color1 Blue
 #property indicator_color2 Yellow
 #property indicator_color3 Red
-#property indicator_color4 Yellow
+#property indicator_color4 Green
 
 
 #define LOGGING  1
 string logfile = "indicator.test.log";
 
-int total;
+int orderTotal;
 
+/*
 void log(string msg){
   if (LOGGING==1){
     int handle;
@@ -39,6 +40,7 @@ void log(string msg){
     }
   }
 }
+*/
 
 
 int CloseType[],OpenType[];
@@ -49,15 +51,28 @@ string OpenSymbol[],CloseSymbol[];
 double HisBuyOpenBuffer[],HisBuyCloseBuffer[],HisSellOpenBuffer[],HisSellCloseBuffer[];
 
 void initOrderInfoBuf(){
-  ArrayResize(OpenTime,total);
-  ArrayResize(CloseTime,total);
-  ArrayResize(OpenPrice,total);
-  ArrayResize(OpenSymbol,total);
-  ArrayResize(ClosePrice,total);
-  ArrayResize(OpenType,total);
-  ArrayResize(CloseType,total);
-  ArrayResize(CloseSymbol,total);
+  ArrayResize(OpenTime,orderTotal);
+  ArrayResize(CloseTime,orderTotal);
+  ArrayResize(OpenPrice,orderTotal);
+  ArrayResize(OpenSymbol,orderTotal);
+  ArrayResize(ClosePrice,orderTotal);
+  ArrayResize(OpenType,orderTotal);
+  ArrayResize(CloseType,orderTotal);
+  ArrayResize(CloseSymbol,orderTotal);
 }
+
+
+int getOrderTotal(){
+  int orderTotal = 0;
+  for(int i=0;i<OrdersHistoryTotal();i++){
+    if(OrderSelect(i,SELECT_BY_POS,MODE_HISTORY )==false) break;        
+    if( OrderSymbol() == Symbol() )
+      if ( OrderType() == OP_BUY || OrderType() == OP_SELL )
+         orderTotal++;
+  }
+  return (orderTotal);
+}
+
 
 void getOrderInfo(int i){
    OpenTime[i] = TimeToStr(OrderOpenTime());    
@@ -118,16 +133,21 @@ void swapOrderCloseInfo(int i, int j){
 }
 
 void readTradingHistory(){
+  int orderIndex = 0;
   for(int i=0;i<OrdersHistoryTotal();i++){
-    if(OrderSelect(i,SELECT_BY_POS,MODE_HISTORY )==false) break;        
-      getOrderInfo(i);
+    if(OrderSelect(i,SELECT_BY_POS,MODE_HISTORY )==false) break;    
+    if( OrderSymbol() == Symbol() )
+      if ( OrderType() == OP_BUY || OrderType() == OP_SELL ){    
+         getOrderInfo(orderIndex);
+         orderIndex++;
+      }
   }
 }
 
 void sortTradingHistory(){
   int i,j;
-  for(i=0; i<total-1; i++){
-    for(j=0; j<=total-i-1; j++){
+  for(i=0; i<orderTotal-1; i++){
+    for(j=0; j<=orderTotal-i-1; j++){
       if (OpenTime[j] < OpenTime[j+1]){
          swapOrderOpenInfo(j,j+1);
       }
@@ -138,8 +158,8 @@ void sortTradingHistory(){
   }
 }
 
-int findOpenHistory(string time0,string time1){   
-   for(int i=0;i<total-1;i++){  
+int findOpenHistory(int bi,string time0,string time1){   
+   for(int i=bi;i<orderTotal-1;i++){  
       if(OpenTime[i] < time0 && OpenTime[i] >= time1){      
          //log("Symbol()="+Symbol()+",OpenSymbol[i]=" + OpenSymbol[i]);
          if(OpenSymbol[i] == Symbol())
@@ -149,8 +169,8 @@ int findOpenHistory(string time0,string time1){
    return (EMPTY);
 }
 
-int findCloseHistory(string time0,string time1){
-   for(int i=0;i<total-1;i++){  
+int findCloseHistory(int bi,string time0,string time1){
+   for(int i=bi;i<orderTotal-1;i++){  
       if(CloseTime[i] < time0 && CloseTime[i] >= time1 ){
          //log("Symbol()="+Symbol()+",OpenSymbol[i]=" + OpenSymbol[i]);
          if(CloseSymbol[i] == Symbol())
@@ -162,7 +182,7 @@ int findCloseHistory(string time0,string time1){
 
 /*
 void printOpenHistory(){
-   for(int i=0;i<total-1;i++){  
+   for(int i=0;i<orderTotal-1;i++){  
       log(OpenTime[i]); 
    }
 }
@@ -174,7 +194,8 @@ void printOpenHistory(){
 //+------------------------------------------------------------------+
 int init()
 {
-   total = OrdersHistoryTotal();
+   // 获取当前品种的交易记录数量
+   orderTotal = getOrderTotal();
    // 初始化数据
    initOrderInfoBuf();
    readTradingHistory();
@@ -213,8 +234,8 @@ int start()
    if(counted_bars>0) counted_bars--;
    limit=Bars-counted_bars;
    
-   log("Bars="+Bars+",counted_bars="+counted_bars);   
-   int i,j;
+   //log("Bars="+Bars+",counted_bars="+counted_bars);   
+   int i,j,oi=0,ci=0;
    string time0,time1;   
    double markPosition;
    for(i=0;i<limit;i++){ 
@@ -224,9 +245,10 @@ int start()
       HisSellCloseBuffer[i]=EMPTY; 
       time0 = TimeToStr(Time[i]);    
       time1 = TimeToStr(Time[i+1]);
-      j = findOpenHistory(time0,time1); 
+      j = findOpenHistory(oi,time0,time1); 
       if(j != EMPTY ){
-      markPosition = OpenPrice[j];
+         oi = j;
+         markPosition = OpenPrice[j];
          //markPosition = Open[i];          
          if(OpenType[j]==OP_BUY) {
             HisBuyOpenBuffer[i]=markPosition;
@@ -235,8 +257,9 @@ int start()
             HisSellOpenBuffer[i]=markPosition;            
          }            
       }
-      j = findCloseHistory(time0,time1); 
-      if (j != EMPTY ){    
+      j = findCloseHistory(ci,time0,time1); 
+      if (j != EMPTY ){
+         ci = j;    
          markPosition = ClosePrice[j];  
          //markPosition = Close[i];  
          if(CloseType[j]==OP_BUY) 
