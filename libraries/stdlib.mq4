@@ -203,4 +203,49 @@ string IntegerToHexString(int integer_number)
 //----
    return(hex_string);
   }
+
 //+------------------------------------------------------------------+
+
+
+void log(string msg){
+   string filename = "debug.log";
+  //if (LOGGING==1){
+    int handle;
+    string timestamp = TimeToStr(TimeCurrent());
+    handle=FileOpen(filename,FILE_READ|FILE_WRITE," ");  
+    if(handle>0)
+    {
+       FileSeek(handle, 0, SEEK_END);
+       FileWrite(handle,timestamp,":", msg);     
+       FileClose(handle );
+    }
+  //}
+}
+
+string StringReplace(string text,string s1,string s2){   
+   if (s1 == "") return (text);
+   string result = text;
+   int bi = 0;   
+   int pos = StringFind(result,s1,bi);
+   int len = StringLen(s2);
+   while (pos != -1) {
+      if (pos != 0) { 
+         result = StringSubstr(result,0,pos) + s2 + StringSubstr(result,pos+StringLen(s1));
+      }else{
+         result = s2 + StringSubstr(result,pos+StringLen(s1));
+      }  
+      bi = pos + len;
+      pos = StringFind(result,s1,bi);
+   } 
+   return(result); 
+}
+
+
+
+
+
+  
+//+------------------------------------------------------------------+
+
+
+
