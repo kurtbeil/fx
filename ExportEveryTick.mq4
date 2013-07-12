@@ -13,6 +13,7 @@ string exportfile;
 int init(){
   string company = StringReplace(AccountCompany()," ","");
   exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+"_EveryTick.csv";  
+  FileDelete(exportfile);
   int handle;
   handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,","); 
   if(handle>0){
