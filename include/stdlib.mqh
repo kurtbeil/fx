@@ -10,4 +10,4 @@ int    RGB(int red_value,int green_value,int blue_value);
 bool   CompareDoubles(double number1,double number2);
 string DoubleToStrMorePrecision(double number,int precision);
 string IntegerToHexString(int integer_number);
-
+string StringReplace(string text,string s1,string s2);
