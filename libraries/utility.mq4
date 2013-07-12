@@ -1,4 +1,4 @@
-
+#property library
 
 
 void log(string filename,string msg){

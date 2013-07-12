@@ -7,9 +7,16 @@
 #property link      "http://www.metaquotes.net/"
 #property show_confirm
 
+
 //+------------------------------------------------------------------+
 //| script "close first market order if it is first in the list"     |
 //+------------------------------------------------------------------+
+
+int init(){
+
+   return(0);
+}
+
 int start()
   {
    bool   result;
