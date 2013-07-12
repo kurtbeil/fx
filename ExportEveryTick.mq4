@@ -11,7 +11,8 @@ string exportfile;
 
 // 创建导出文件
 int init(){
-  exportfile = "TB_"+Symbol()+"_M"+Period()+"_EveryTick.csv";  
+  string company = StringReplace(AccountCompany()," ","");
+  exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+"_EveryTick.csv";  
   int handle;
   handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,","); 
   if(handle>0){
@@ -49,14 +50,9 @@ int start()
    // 获取即时的RSI值 
    rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
    // 导出数据
-   datalog( 
-     n + "," + Ask + "," + Bid + "," + Volume[0] + "," + newBar + "," + rsi + "," + StringReplace(AccountCompany()," ","") 
-   );    
-   n ++;
+   datalog(n + "," + Ask + "," + Bid + "," + Volume[0] + "," + newBar + "," + rsi + ",");    
+   n ++;  
 }
-
-
-
 
 
 //+------------------------------------------------------------------+
