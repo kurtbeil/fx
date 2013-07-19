@@ -1,20 +1,14 @@
 
 #include <utility.mqh>
-
-/*
-1、不是所有的市场都支持多空双向开仓的
-
-
-*/
-
-
-
+#include <stdlib.mqh>
 
 #define MAGIC  102
 
-int lastBuyCreated =EMPTY;
-int lastSellCreated =EMPTY;
+datetime lastBuyCreated =EMPTY;
+datetime lastSellCreated =EMPTY;
 
+double takeprofit = 5;
+double stoploss = 15;
 
 bool isTradingHour(){
    int hh24 = TimeHour(TimeCurrent());
@@ -33,15 +27,23 @@ void checkForClose(){
     if( OrderMagicNumber()!=MAGIC ) continue;    
     if( OrderSymbol()!=Symbol() ) continue;        
     if(OrderType() == OP_BUY){
-      if ( Bid-OrderOpenPrice() > 5 * PointSize() || Bid-OrderOpenPrice() < -15 * PointSize() ) {
+      if ( Bid-OrderOpenPrice() > takeprofit  * PointSize() || 
+           OrderOpenPrice()-Bid > stoploss * PointSize() || 
+           MinutesBetween(TimeCurrent(),lastBuyCreated) > 60 ) 
+      {
          ClosePosition(OrderTicket());
       }  
+     
     }
     if(OrderType() == OP_SELL){
-      if ( OrderOpenPrice() - Ask > 5 * PointSize() || OrderOpenPrice() - Ask < -15 * PointSize() ) {
+      if ( OrderOpenPrice() - Ask > takeprofit * PointSize() ||
+           Ask-OrderOpenPrice() > stoploss * PointSize() ||
+           MinutesBetween(TimeCurrent(),lastSellCreated) > 60 ) 
+      {
          ClosePosition(OrderTicket());
       }  
-    }    
+    }  
+      
   }
 }
 
@@ -49,29 +51,55 @@ double getLots(){
    return (0.1);
 }
 
+bool isSameHour(datetime dt1,datetime dt2){
+   string dt1str = StringSubstr(TimeToStr(dt1),0,13);
+   string dt2str = StringSubstr(TimeToStr(dt2),0,13);
+   if ( dt1str == dt2str ) {
+      return (true);
+   }else{
+      return (false);
+   }
+}
+
+
 void checkForOpen(){
    double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
    int hh24 = TimeHour(TimeCurrent());
    if ( isTradingHour() ) {
-      if ( lastBuyCreated == EMPTY && lastBuyCreated != hh24) {
+      if ( lastBuyCreated == EMPTY || !isSameHour(TimeCurrent(),lastBuyCreated) ) {
          if ( rsi < 30 ) {
             // open a buy opsition  
-            lastBuyCreated = hh24;
+            lastBuyCreated = TimeCurrent();
             CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
          }      
       }
-      if ( lastSellCreated == EMPTY && lastSellCreated != hh24) {
+      if ( lastSellCreated == EMPTY || !isSameHour(TimeCurrent(),lastSellCreated) ) {
          if ( rsi > 70 ) {
             // open a sell opsition
-            lastSellCreated = hh24;
-            CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
+            lastSellCreated = TimeCurrent();
+            //CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
          } 
       }
+       
    }   
 }
 
+bool isFirstTick(){
+   static double LastVolume= -1 ;  
+   if (Volume[0] >= LastVolume && LastVolume != -1 ){
+      LastVolume = Volume[0];    
+      return(false);
+   }
+   LastVolume = Volume[0];  
+   return(true);
+}
+
+
 int start(){     
-   checkForOpen();
-   checkForClose();
+   if (isFirstTick()){
+      checkForOpen();
+
+   }
+   checkForClose();  
 }
 

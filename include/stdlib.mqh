@@ -11,3 +11,8 @@ bool   CompareDoubles(double number1,double number2);
 string DoubleToStrMorePrecision(double number,int precision);
 string IntegerToHexString(int integer_number);
 string StringReplace(string text,string s1,string s2);
+
+
+double MinutesBetween(datetime datetime1,datetime datetime2);
+double HoursBetween(datetime datetime1,datetime datetime2);
+double DaysBetween(datetime datetime1,datetime datetime2);

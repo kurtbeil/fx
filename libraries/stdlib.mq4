@@ -240,10 +240,18 @@ string StringReplace(string text,string s1,string s2){
    return(result); 
 }
 
+// date - 作为秒钟的数字从00:00 1970 年1月1 日开始。 
+double MinutesBetween(datetime datetime1,datetime datetime2){
+  return (1.0*(datetime1-datetime2)/60);
+}
 
+double HoursBetween(datetime datetime1,datetime datetime2){
+  return (MinutesBetween(datetime1,datetime2)/60);
+}
 
-
-
+double DaysBetween(datetime datetime1,datetime datetime2){
+  return (DaysBetween(datetime1,datetime2)/24);
+}
   
 //+------------------------------------------------------------------+
 
