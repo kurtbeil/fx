@@ -22,6 +22,7 @@ int start()
    bool   result;
    double price;
    int    cmd,error;
+   Print("hello");
 //----
    if(OrderSelect(0,SELECT_BY_POS,MODE_TRADES))
      {

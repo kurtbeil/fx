@@ -12,7 +12,7 @@ int init(){
   handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,","); 
   if(handle>0){
     FileSeek(handle, 0, SEEK_END);
-    FileWrite(handle,"Time,Open,Close,High,Low,Volume,Ask,Bid");
+    FileWrite(handle,"time,open,close,high,low,volume,ask,bid,rsi");
     FileClose(handle );    
   } 
 }
@@ -37,8 +37,9 @@ void datalog(string msg){
 // 处理每根线的第1帧
 int onFirstTick(){
   // 记录交易关键数据
+  double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
   datalog( 
-    Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid
+    Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid + "," + rsi
   );
   // Time,Open,Close,High,Low,Volume,Ask,Bid
 }
