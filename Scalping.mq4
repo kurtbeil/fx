@@ -32,7 +32,7 @@ void checkForClose(){
            MinutesBetween(TimeCurrent(),lastBuyCreated) > 60 ) 
       {
          ClosePosition(OrderTicket());
-         writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Bid);
+         //writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Bid);
       }  
      
     }
@@ -42,7 +42,7 @@ void checkForClose(){
            MinutesBetween(TimeCurrent(),lastSellCreated) > 60 ) 
       {
          ClosePosition(OrderTicket());
-         writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Ask);
+         //writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Ask);
       }  
     }  
       
@@ -64,7 +64,7 @@ bool isSameHour(datetime dt1,datetime dt2){
       return (false);
    }
 }
-
+/*
 void writeOpenLog(string msg){
    int handle;
    string filename = "PositionLog.csv";
@@ -77,8 +77,6 @@ void writeOpenLog(string msg){
       FileClose(handle );
    }
 }
-
-
 int init(){
    string filename = "PositionLog.csv";
    FileDelete(filename);
@@ -89,6 +87,7 @@ int init(){
       FileClose(handle );    
    } 
 }
+*/
 
 
 void checkForOpen(){
