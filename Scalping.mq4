@@ -32,6 +32,7 @@ void checkForClose(){
            MinutesBetween(TimeCurrent(),lastBuyCreated) > 60 ) 
       {
          ClosePosition(OrderTicket());
+         writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Bid);
       }  
      
     }
@@ -41,15 +42,18 @@ void checkForClose(){
            MinutesBetween(TimeCurrent(),lastSellCreated) > 60 ) 
       {
          ClosePosition(OrderTicket());
+         writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Ask);
       }  
     }  
       
   }
 }
 
+
 double getLots(){
    return (0.1);
 }
+
 
 bool isSameHour(datetime dt1,datetime dt2){
    string dt1str = StringSubstr(TimeToStr(dt1),0,13);
@@ -61,23 +65,48 @@ bool isSameHour(datetime dt1,datetime dt2){
    }
 }
 
+void writeOpenLog(string msg){
+   int handle;
+   string filename = "PositionLog.csv";
+   string timestamp = TimeToStr(TimeCurrent());
+   handle=FileOpen(filename,FILE_READ|FILE_WRITE," ");  
+   if(handle>0)
+   {
+      FileSeek(handle, 0, SEEK_END);
+      FileWrite(handle,timestamp,",", msg);     
+      FileClose(handle );
+   }
+}
+
+
+int init(){
+   string filename = "PositionLog.csv";
+   FileDelete(filename);
+   int handle=FileOpen(filename,FILE_READ|FILE_WRITE|FILE_CSV ," "); 
+   if(handle>0){
+      FileSeek(handle, 0, SEEK_END);
+      FileWrite(handle,"time,order_type,open_time,open_price,close_time,close_price");
+      FileClose(handle );    
+   } 
+}
+
 
 void checkForOpen(){
    double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
    int hh24 = TimeHour(TimeCurrent());
    if ( isTradingHour() ) {
       if ( lastBuyCreated == EMPTY || !isSameHour(TimeCurrent(),lastBuyCreated) ) {
-         if ( rsi < 30 ) {
+         if ( rsi < 35 ) {
             // open a buy opsition  
             lastBuyCreated = TimeCurrent();
             CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
          }      
       }
       if ( lastSellCreated == EMPTY || !isSameHour(TimeCurrent(),lastSellCreated) ) {
-         if ( rsi > 70 ) {
+         if ( rsi > 65 ) {
             // open a sell opsition
             lastSellCreated = TimeCurrent();
-            //CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
+            CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
          } 
       }
        
