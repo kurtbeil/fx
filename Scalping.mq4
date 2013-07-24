@@ -13,6 +13,7 @@ double stoploss = 15;
 bool isTradingHour(){
    int hh24 = TimeHour(TimeCurrent());
    if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {      
+   //if (  hh24 == 0 ) {      
       return (true);
    }else {
       return (false);
