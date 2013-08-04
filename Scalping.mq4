@@ -4,6 +4,16 @@
 
 #define MAGIC  102
 
+
+/*
+  
+
+
+
+
+*/
+
+
 datetime lastBuyCreated =EMPTY;
 datetime lastSellCreated =EMPTY;
 
@@ -127,7 +137,6 @@ bool isFirstTick(){
 int start(){     
    if (isFirstTick()){
       checkForOpen();
-
    }
    checkForClose();  
 }
