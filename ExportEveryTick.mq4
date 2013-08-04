@@ -8,7 +8,6 @@
 
 string exportfile;
 
-
 // 创建导出文件
 int init(){
   string company = StringReplace(AccountCompany()," ","");
