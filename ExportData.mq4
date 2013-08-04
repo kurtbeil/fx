@@ -2,7 +2,7 @@
 #include <stdlib.mqh>
 
 /***************************************************
- *            µ¼³öËù¾­ÀúÊ±¼äÖÜÆÚµÄÊý¾Ý             *
+ *            å¯¼å‡ºæ‰€ç»åŽ†æ—¶é—´å‘¨æœŸçš„æ•°æ®                                      *
  ***************************************************/
 
 string exportfile;
@@ -20,7 +20,7 @@ int init(){
 }
 
 
-// Êý¾ÝÈÕÖ¾
+// Ë½ßÉ•Ö¾
 void datalog(string msg){
    int handle;
    string timestamp = TimeToStr(TimeCurrent());
@@ -34,13 +34,13 @@ void datalog(string msg){
 }
 
 /***************************************************
- *                    Ö÷Ìâ³ÌÐò½á¹¹                 *
+ *                    ×·Í¢ÔŒÑ²Þ¡Ù¹                 *
  ***************************************************/
 
-// ´¦ÀíÃ¿¸ùÏßµÄµÚ1Ö¡
+// Ô¦mÃ¿Ù¹ÐŸÖ„Öš1Ö¡
 int onFirstTick(){
    static int n=0;
-  // ¼ÇÂ¼½»Ò×¹Ø¼üÊý¾Ý
+  // Ý‡Â¼Ý»Ó—Ú˜Ý¼Ë½ß
   double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);  
   datalog( 
     Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid + "," + rsi + "," + n
@@ -49,12 +49,12 @@ int onFirstTick(){
   n++;
 }
 
-// ´¦ÀíÃ¿Ò»Ö¡
+// Ô¦mÃ¿Ò»Ö¡
 int onEveryTick(){
 
 }
 
-// ¼ì²éÊÇ·ñÊÇ°ôÏßµÄµÚ1Ö¡
+// Ý¬Ó©Ë‡Ø±Ë‡Ñ´ÐŸÖ„Öš1Ö¡
 bool isFirstTick(){
   static double LastVolume= -1 ;  
   if (Volume[0] > LastVolume && LastVolume != -1 ){
@@ -65,7 +65,7 @@ bool isFirstTick(){
   return(true);
 }
 
-// Ö÷³ÌÐò
+// ×·ÔŒÑ²
 int start()
 { 
   if(isFirstTick()) {
