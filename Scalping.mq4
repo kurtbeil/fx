@@ -40,7 +40,7 @@ datetime lastSellCreated =EMPTY;
 double takeprofit = 5;
 double stoploss = 15;
 
-
+ 
 // 获利范围设置
 double long_tp_size = 0;
 double long_sl_size = 0;
