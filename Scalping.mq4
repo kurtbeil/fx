@@ -40,18 +40,6 @@ datetime lastSellCreated =EMPTY;
 double takeprofit = 5;
 double stoploss = 15;
 
-<<<<<<< HEAD
-
-bool isTradingHour(){
-   int hh24 = TimeHour(TimeCurrent());
-   if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {      
-   //if (  hh24 == 0 ) {      
-      return (true);
-   }else {
-      return (false);
-   }
-}
-=======
  
 // 获利范围设置
 double long_tp_size = 0;
@@ -66,7 +54,6 @@ double short_rsi_low = 70;
 double short_rsi_high = 100;
 
 
->>>>>>> f567006b685e01f35dc6b88821014f488cef7f61
 
 int init(){
    long_tp_size = 0.0001 * 2.5;
@@ -76,10 +63,6 @@ int init(){
 }
 
 
-<<<<<<< HEAD
-double getLots() {
-	return (0.1);
-=======
 // 交易最长时间范围设定
 double trading_length = 120;
 
@@ -94,7 +77,6 @@ bool isLongTradingHour() {
 	} else {
 		return (false);
 	}	
->>>>>>> f567006b685e01f35dc6b88821014f488cef7f61
 }
 
 // 空头交易的时间范围
@@ -110,31 +92,6 @@ bool isShortTradingHour() {
 
 
 
-<<<<<<< HEAD
-bool isSameHour(datetime dt1,datetime dt2) {
-	string dt1str = StringSubstr(TimeToStr(dt1),0,13);
-	string dt2str = StringSubstr(TimeToStr(dt2),0,13);
-	if ( dt1str == dt2str ) {
-		return (true);
-	} else {
-		return (false);
-	}
-}
-
-
-/*
-void writeOpenLog(string msg){
-   int handle;
-   string filename = "PositionLog.csv";
-   string timestamp = TimeToStr(TimeCurrent());
-   handle=FileOpen(filename,FILE_READ|FILE_WRITE," ");  
-   if(handle>0)
-   {
-      FileSeek(handle, 0, SEEK_END);
-      FileWrite(handle,timestamp,",", msg);     
-      FileClose(handle );
-   }
-=======
 void checkForOpen() {
 	double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
 	int hh24 = TimeHour(TimeCurrent());
@@ -188,7 +145,6 @@ void checkForClose() {
 		}
 
 	}
->>>>>>> f567006b685e01f35dc6b88821014f488cef7f61
 }
 
 
@@ -199,28 +155,6 @@ double getLots() {
 }
 
 
-<<<<<<< HEAD
-void checkForOpen() {
-	double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
-	int hh24 = TimeHour(TimeCurrent());
-	if ( isTradingHour() ) {
-		if ( lastBuyCreated == EMPTY || !isSameHour(TimeCurrent(),lastBuyCreated) ) {
-			if ( rsi < 35 ) {
-				// open a buy opsition
-				lastBuyCreated = TimeCurrent();
-				CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
-			}
-		}
-		if ( lastSellCreated == EMPTY || !isSameHour(TimeCurrent(),lastSellCreated) ) {
-			if ( rsi > 65 ) {
-				// open a sell opsition
-				lastSellCreated = TimeCurrent();
-				CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
-			}
-		}
-
-	}
-=======
 
 /*
 double getLots(){
@@ -230,7 +164,6 @@ double getLots(){
   lots = MathRound(lots*10)/10;  
   if(lots<0.1) lots=0.1;  
   return (lots);    
->>>>>>> f567006b685e01f35dc6b88821014f488cef7f61
 }
 */
 
@@ -246,20 +179,11 @@ bool isFirstTick() {
 }
 
 
-<<<<<<< HEAD
-
-int start(){     
-   if (isFirstTick()){
-      checkForOpen();
-   }
-   checkForClose();  
-=======
 int start() {
 	if (isFirstTick()) {
 		checkForOpen();		
 	}
 	checkForClose();
->>>>>>> f567006b685e01f35dc6b88821014f488cef7f61
 }
 
 
