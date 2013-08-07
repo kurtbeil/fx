@@ -2,14 +2,14 @@
 #include <stdlib.mqh>
 
 /***************************************************
- *            µ¼³öËù¾­ÀúÊ±¼äÖÜÆÚµÄÊı¾İ             *
+ *           å¯¼å‡ºæ‰€ç»å†æ—¶é—´å‘¨æœŸçš„æ•°æ®                                       *
  ***************************************************/
 
 string exportfile;
 
 int init(){
    string company = StringReplace(AccountCompany()," ","");
-   exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+"_EveryTick.csv";  
+   exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+".csv";  
    FileDelete(exportfile);
    int handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,","); 
    if(handle>0){
@@ -34,7 +34,7 @@ void datalog(string msg){
 }
 
 /***************************************************
- *                    Ö÷Ìâ³ÌĞò½á¹¹                 *
+ *                    ä¸»é¢˜ç¨‹åºç»“æ„                                                 *
  ***************************************************/
 
 // ´¦ÀíÃ¿¸ùÏßµÄµÚ1Ö¡
