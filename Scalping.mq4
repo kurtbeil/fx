@@ -30,6 +30,9 @@ commit id : fb09c1c53a00a6967b7bf9503e7847f9397c57ff
 1、进一步优化的空间不会非常大，应该尝试引入新的过滤器提高交易的盈利潜力  
 2、通过挂线交易来分析交易系统的合理性和缺陷
 ---------------------------------------------------------------------------------------------------------
+2013-08-21
+commit id : 
+将之前的RSI周期调整为16获得了更好的交易效果
 
 */
 
@@ -93,7 +96,7 @@ bool isShortTradingHour() {
 
 
 void checkForOpen() {
-	double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
+	double rsi = iRSI(Symbol(),Period(),16,PRICE_CLOSE,0);
 	int hh24 = TimeHour(TimeCurrent());
 	//Print("PositionCount(Symbol(),OP_BUY,MAGIC)=" + PositionCount(Symbol(),OP_BUY,MAGIC));
 	//PositionCount(Symbol(),OP_BUY,MAGIC);
