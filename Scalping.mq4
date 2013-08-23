@@ -93,7 +93,7 @@ bool isShortTradingHour() {
 
 
 void checkForOpen() {
-	double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
+	double rsi = iRSI(Symbol(),Period(),15,PRICE_CLOSE,0);
 	int hh24 = TimeHour(TimeCurrent());
 	//Print("PositionCount(Symbol(),OP_BUY,MAGIC)=" + PositionCount(Symbol(),OP_BUY,MAGIC));
 	//PositionCount(Symbol(),OP_BUY,MAGIC);
