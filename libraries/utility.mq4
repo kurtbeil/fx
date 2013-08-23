@@ -23,12 +23,12 @@ int PositionCount(string symbol,int cmd,int magic) {
 	return(cnt);
 }
 
-double PointSize() {
+double StandardPointSize() {
 	return (0.0001);
 }
 
 double GetSlipPoints() {
-	return (3*PointSize()/Point);
+	return (StandardPointSize()*3/Point);
 }
 
 int CreatePosition(string symbol,int cmd,double lots,int magic) {

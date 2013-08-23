@@ -2,11 +2,7 @@
 #include <stdlib.mqh>
 
 /***************************************************
-<<<<<<< HEAD
- *            导出所经历时间周期的数据                                      *
-=======
  *           导出所经历时间周期的数据                                       *
->>>>>>> cab55242c5c2885bc4ad7cf632d468fbb5c30978
  ***************************************************/
 
 string exportfile;
@@ -24,7 +20,7 @@ int init(){
 }
 
 
-// ˽ߝɕ־
+// 保存数据过程
 void datalog(string msg){
    int handle;
    string timestamp = TimeToStr(TimeCurrent());
@@ -37,18 +33,11 @@ void datalog(string msg){
    }
 }
 
-/***************************************************
-<<<<<<< HEAD
- *                    ׷͢ԌѲޡٹ                 *
-=======
- *                    主题程序结构                                                 *
->>>>>>> cab55242c5c2885bc4ad7cf632d468fbb5c30978
- ***************************************************/
 
-// ԦmÿٹПք֚1֡
+// 第1跳执行
 int onFirstTick(){
    static int n=0;
-  // ݇¼ݻӗژݼ˽ߝ
+  //保存关数据到文件
   double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);  
   datalog( 
     Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid + "," + rsi + "," + n
@@ -57,12 +46,12 @@ int onFirstTick(){
   n++;
 }
 
-// Ԧmÿһ֡
+// 每1跳执行
 int onEveryTick(){
 
 }
 
-// ݬөˇرˇѴПք֚1֡
+// 判断是否是第1跳
 bool isFirstTick(){
   static double LastVolume= -1 ;  
   if (Volume[0] > LastVolume && LastVolume != -1 ){
@@ -73,7 +62,7 @@ bool isFirstTick(){
   return(true);
 }
 
-// ׷ԌѲ
+// 主程序过程
 int start()
 { 
   if(isFirstTick()) {

@@ -40,9 +40,6 @@ echo
 datetime lastBuyCreated =EMPTY;
 datetime lastSellCreated =EMPTY;
 
-double takeprofit = 5;
-double stoploss = 15;
-
  
 // 获利范围设置
 double long_tp_size = 0;
@@ -51,18 +48,16 @@ double short_tp_size = 0;
 double short_sl_size = 0;
 
 // Rsi信号发生器设置
-double long_rsi_low = 0;
-double long_rsi_high = 30;
-double short_rsi_low = 70;
-double short_rsi_high = 100;
 
-
+double long_rsi_level = 30;
+double short_rsi_level = 70;
+double rsi_period = 7;
 
 int init(){
-   long_tp_size = 0.0001 * 2.5;
-   long_sl_size =  0.0001 * 18;
-   short_tp_size  = 0.0001 * 6;
-   short_sl_size = 0.0001 * 16;
+   long_tp_size = StandardPointSize() * 2.5;
+   long_sl_size =  StandardPointSize() * 18;
+   short_tp_size = StandardPointSize() * 6;
+   short_sl_size = StandardPointSize() * 16;
 }
 
 
@@ -94,16 +89,16 @@ bool isShortTradingHour() {
 }
 
 
-
 void checkForOpen() {
-	double rsi = iRSI(Symbol(),Period(),15,PRICE_CLOSE,0);
+	// 计算对应的rsi0值
+	double rsi0 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,0);
+	double rsi1 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,1);
+	// 计算当前的时间段
 	int hh24 = TimeHour(TimeCurrent());
-	//Print("PositionCount(Symbol(),OP_BUY,MAGIC)=" + PositionCount(Symbol(),OP_BUY,MAGIC));
-	//PositionCount(Symbol(),OP_BUY,MAGIC);
+
 	if ( isLongTradingHour() ) {
-		//if ( lastBuyCreated == EMPTY || !isSameHour(TimeCurrent(),lastBuyCreated) ) {
 		if (PositionCount(Symbol(),OP_BUY,MAGIC) == 0 ) {
-			if ( rsi >= long_rsi_low  &&  rsi <= long_rsi_high ) {
+			if ( rsi1 <= long_rsi_level  &&  rsi0 > long_rsi_level ) {
 				// open a buy opsition
 				lastBuyCreated = TimeCurrent();
 				CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
@@ -111,9 +106,8 @@ void checkForOpen() {
 		}
 	}
 	if ( isShortTradingHour() ) {
-		//if( lastSellCreated == EMPTY || !isSameHour(TimeCurrent(),lastSellCreated) ) {
 		if (PositionCount(Symbol(),OP_SELL,MAGIC) == 0 ) {
-		if ( rsi > short_rsi_low  &&  rsi < short_rsi_high ) {
+		if ( rsi1 >= short_rsi_level  &&  rsi0 < short_rsi_level ) {
 				// open a sell opsition
 				lastSellCreated = TimeCurrent();
 				CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
