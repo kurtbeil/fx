@@ -2,14 +2,18 @@
 #include <stdlib.mqh>
 
 /***************************************************
+<<<<<<< HEAD
  *            导出所经历时间周期的数据                                      *
+=======
+ *           导出所经历时间周期的数据                                       *
+>>>>>>> cab55242c5c2885bc4ad7cf632d468fbb5c30978
  ***************************************************/
 
 string exportfile;
 
 int init(){
    string company = StringReplace(AccountCompany()," ","");
-   exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+"_EveryTick.csv";  
+   exportfile = "TB_"+company+"_"+Symbol()+"_M"+Period()+".csv";  
    FileDelete(exportfile);
    int handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,","); 
    if(handle>0){
@@ -34,7 +38,11 @@ void datalog(string msg){
 }
 
 /***************************************************
+<<<<<<< HEAD
  *                    ׷͢ԌѲޡٹ                 *
+=======
+ *                    主题程序结构                                                 *
+>>>>>>> cab55242c5c2885bc4ad7cf632d468fbb5c30978
  ***************************************************/
 
 // ԦmÿٹПք֚1֡
