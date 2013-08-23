@@ -33,7 +33,7 @@ commit id : fb09c1c53a00a6967b7bf9503e7847f9397c57ff
 2013-08-21
 commit id : 437c89a7efda6a8d15ee67317e881f1877c4adf9
 将之前的RSI周期调整为16获得了更好的交易效果，能在30点点差（10万分点）情况下具备正期望
-master
+echo
 */
 
 
