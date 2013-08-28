@@ -68,8 +68,9 @@ double trading_length = 120;
 // 多头交易的时间范围
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	//if ( hh24 == 22 || hh24 == 23 || hh24 == 0 || hh24 == 2 ) {
-	if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
+	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
+	//if (false){
+	if(hh24==0){
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
@@ -80,7 +81,8 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if ( hh24 == 22 || hh24 == 0 ) {
+	if (false){
+	//if ( hh24 == 22 || hh24 == 0 ) {
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
