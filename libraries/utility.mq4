@@ -66,4 +66,15 @@ void ClosePosition(int ticket) {
 	}
 }
 
+// 判断是否是第1跳
+bool IsFirstTick() {
+	static string last_timestamp = "1970.01.01 00:00";
+	string timestamp = TimeToStr(TimeCurrent());
+	bool result=false;
+	if(timestamp!=last_timestamp) {
+		result = true;
+	}
+	last_timestamp = timestamp;
+	return(result);
+}
 

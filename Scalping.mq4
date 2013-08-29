@@ -27,7 +27,7 @@ commit id : fb09c1c53a00a6967b7bf9503e7847f9397c57ff
 2、获得了一套比较优化的参数，使得交易系统在点差20点（10万分点）或以下,具备正期望。
 
 下一步:
-1、进一步优化的空间不会非常大，应该尝试引入新的过滤器提高交易的盈利潜力  
+1、进一步优化的空间不会非常大，应该尝试引入新的过滤器提高交易的盈利潜力
 2、通过挂线交易来分析交易系统的合理性和缺陷
 ---------------------------------------------------------------------------------------------------------
 2013-08-21
@@ -37,10 +37,7 @@ echo
 */
 
 
-datetime lastBuyCreated =EMPTY;
-datetime lastSellCreated =EMPTY;
 
- 
 // 获利范围设置
 double long_tp_size = 0;
 double long_sl_size = 0;
@@ -48,16 +45,39 @@ double short_tp_size = 0;
 double short_sl_size = 0;
 
 // Rsi信号发生器设置
-
 double long_rsi_level = 30;
 double short_rsi_level = 70;
 double rsi_period = 7;
+int max_long_position = 5;
+int max_short_position = 5;
 
-int init(){
-   long_tp_size = StandardPointSize() * 2.5;
-   long_sl_size =  StandardPointSize() * 18;
-   short_tp_size = StandardPointSize() * 6;
-   short_sl_size = StandardPointSize() * 16;
+int init() {
+	long_tp_size = StandardPointSize() * 1.5;
+	long_sl_size =  StandardPointSize() * 10;
+	short_tp_size = StandardPointSize() * 6;
+	short_sl_size = StandardPointSize() * 16;
+
+	string exportfile = "closelog.csv";
+
+	FileDelete(exportfile);
+	int handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,",");
+	if(handle>0) {
+		FileSeek(handle, 0, SEEK_END);
+		FileWrite(handle,"time,opentime,closetime,openprice,closeprice");
+		FileClose(handle );
+	}
+}
+
+void closelog(string msg) {
+	int handle;
+	string exportfile = "closelog.csv";
+	string timestamp = TimeToStr(TimeCurrent());
+	handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,",");
+	if(handle>0) {
+		FileSeek(handle, 0, SEEK_END);
+		FileWrite(handle,timestamp, msg);
+		FileClose(handle );
+	}
 }
 
 
@@ -69,25 +89,25 @@ double trading_length = 120;
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
 	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
-	//if (false){
-	if(hh24==0){
+	if (true) {
+		//if(hh24==0) {
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
 		return (false);
-	}	
+	}
 }
 
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (false){
-	//if ( hh24 == 22 || hh24 == 0 ) {
+	if (false) {
+		//if ( hh24 == 22 || hh24 == 0 ) {
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
 		return (false);
-	}	
+	}
 }
 
 
@@ -99,19 +119,17 @@ void checkForOpen() {
 	int hh24 = TimeHour(TimeCurrent());
 
 	if ( isLongTradingHour() ) {
-		if (PositionCount(Symbol(),OP_BUY,MAGIC) == 0 ) {
+		if (PositionCount(Symbol(),OP_BUY,MAGIC) + 1 <=  max_long_position ) {
 			if ( rsi1 <= long_rsi_level  &&  rsi0 > long_rsi_level ) {
 				// open a buy opsition
-				lastBuyCreated = TimeCurrent();
 				CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
 			}
 		}
 	}
 	if ( isShortTradingHour() ) {
-		if (PositionCount(Symbol(),OP_SELL,MAGIC) == 0 ) {
-		if ( rsi1 >= short_rsi_level  &&  rsi0 < short_rsi_level ) {
+		if (PositionCount(Symbol(),OP_SELL,MAGIC)  + 1 <= max_short_position) {
+			if ( rsi1 >= short_rsi_level  &&  rsi0 < short_rsi_level ) {
 				// open a sell opsition
-				lastSellCreated = TimeCurrent();
 				CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
 			}
 		}
@@ -121,28 +139,35 @@ void checkForOpen() {
 void checkForClose() {
 	bool ret;
 	int ticket;
-	for(int i=0; i<OrdersTotal(); i++) {
+	string timestamp = TimeToStr(TimeCurrent());
+	if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"  ) {
+		Print("PositionCount="+PositionCount(Symbol(),OP_BUY,MAGIC));
+		Print("OrdersTotal="+OrdersTotal());
+	}
+	int total=OrdersTotal();
+	for(int i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
 		if( OrderMagicNumber()!=MAGIC ) continue;
 		if( OrderSymbol()!=Symbol() ) continue;
 		if(OrderType() == OP_BUY) {
 			if ( Bid-OrderOpenPrice() > long_tp_size ||
 			        OrderOpenPrice()-Bid > long_sl_size ||
-			        MinutesBetween(TimeCurrent(),lastBuyCreated) > trading_length ) {
+			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
 				ClosePosition(OrderTicket());
-				//writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Bid);
+				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
+				if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"   ) {
+					Print("OrdersTotal="+OrdersTotal());
+				}
 			}
-
 		}
 		if(OrderType() == OP_SELL) {
 			if ( OrderOpenPrice() - Ask > short_tp_size ||
 			        Ask-OrderOpenPrice() > short_sl_size ||
-			        MinutesBetween(TimeCurrent(),lastSellCreated) > trading_length ) {
+			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
 				ClosePosition(OrderTicket());
-				//writeOpenLog(OrderType()+","+TimeToStr(OrderOpenTime())+","+OrderOpenPrice()+","+TimeToStr(TimeCurrent())+","+Ask);
+				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 			}
 		}
-
 	}
 }
 
@@ -157,32 +182,25 @@ double getLots() {
 
 /*
 double getLots(){
-  double lots;     
+  double lots;
   lots = AccountBalance()/10000;
   //Print("lots="+lots);
-  lots = MathRound(lots*10)/10;  
-  if(lots<0.1) lots=0.1;  
-  return (lots);    
+  lots = MathRound(lots*10)/10;
+  if(lots<0.1) lots=0.1;
+  return (lots);
 }
 */
 
 
-bool isFirstTick() {
-	static double LastVolume= -1 ;
-	if (Volume[0] >= LastVolume && LastVolume != -1 ) {
-		LastVolume = Volume[0];
-		return(false);
-	}
-	LastVolume = Volume[0];
-	return(true);
-}
-
-
 int start() {
-	if (isFirstTick()) {
-		checkForOpen();		
+	if (IsFirstTick()) {
+		checkForOpen();
+		checkForClose();
+		//string timestamp = TimeToStr(TimeCurrent());
+		//if (timestamp == "2013.07.01 00:46"  || timestamp == "2013.07.01 00:47"  || timestamp == "2013.07.01 00:48"  ) {
+		//	Print("Bid="+Bid);
+		//}
 	}
-	checkForClose();
 }
 
 

@@ -1,5 +1,6 @@
 
 #include <stdlib.mqh>
+#include <utility.mqh>
 
 /***************************************************
  *           导出所经历时间周期的数据                                       *
@@ -51,17 +52,6 @@ int onEveryTick() {
 
 }
 
-// 判断是否是第1跳
-bool isFirstTick() {
-	static string last_timestamp = "1970.01.01 00:00";
-	string timestamp = TimeToStr(TimeCurrent());
-	bool result=false;
-	if(timestamp!=last_timestamp) {
-		result = true;
-	}
-	last_timestamp = timestamp;
-	return(result);
-}
 
 // 主程序过程
 int start() {
@@ -70,7 +60,7 @@ int start() {
 		Print(TimeToStr(TimeCurrent()));
 		i++;
 	}
-	if(isFirstTick()) {
+	if(IsFirstTick()) {
 		onFirstTick();
 	}
 	onEveryTick();
