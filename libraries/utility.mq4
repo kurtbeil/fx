@@ -13,9 +13,9 @@ void WriteLog(int magic,string msg) {
 }
 
 int PositionCount(string symbol,int cmd,int magic) {
-	int cnt=0;	
-	for( int i=0; i<OrdersTotal(); i++ ) {				
-		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;		
+	int cnt=0;
+	for( int i=0; i<OrdersTotal(); i++ ) {
+		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
 		if ( OrderSymbol() != symbol ) continue;
 		if ( magic != -1 && OrderMagicNumber() != magic ) continue;
 		if ( OrderType() == cmd ) cnt++ ;
@@ -77,4 +77,25 @@ bool IsFirstTick() {
 	last_timestamp = timestamp;
 	return(result);
 }
+
+
+// 头寸关闭队列
+static int TicketCloseQueue [1000];
+static int TicketCloseQueue_Count = 0;
+
+void PutTicketCloseQueue(int ticket) {
+	int i = TicketCloseQueue_Count;
+	TicketCloseQueue[i] = ticket;
+	TicketCloseQueue_Count ++;
+}
+
+void ClearTicketCloseQueue() {
+	for(int i=0; i<TicketCloseQueue_Count; i++) {
+		int ticket = TicketCloseQueue[i];
+		ClosePosition(ticket);
+	}
+	TicketCloseQueue_Count = 0;
+}
+
+
 

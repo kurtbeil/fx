@@ -10,3 +10,6 @@ void ClosePosition(int ticket);
 int PositionCount(string symbol,int cmd,int magic);
 double StandardPointSize();
 bool IsFirstTick();
+
+void PutTicketCloseQueue(int ticket);
+void ClearTicketCloseQueue();

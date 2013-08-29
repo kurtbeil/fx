@@ -139,11 +139,13 @@ void checkForOpen() {
 void checkForClose() {
 	bool ret;
 	int ticket;
+	
 	string timestamp = TimeToStr(TimeCurrent());
 	if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"  ) {
 		Print("PositionCount="+PositionCount(Symbol(),OP_BUY,MAGIC));
 		Print("OrdersTotal="+OrdersTotal());
-	}
+	}	
+	
 	int total=OrdersTotal();
 	for(int i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
@@ -153,7 +155,8 @@ void checkForClose() {
 			if ( Bid-OrderOpenPrice() > long_tp_size ||
 			        OrderOpenPrice()-Bid > long_sl_size ||
 			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
-				ClosePosition(OrderTicket());
+				//ClosePosition(OrderTicket());
+				PutTicketCloseQueue(OrderTicket());
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 				if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"   ) {
 					Print("OrdersTotal="+OrdersTotal());
@@ -164,11 +167,14 @@ void checkForClose() {
 			if ( OrderOpenPrice() - Ask > short_tp_size ||
 			        Ask-OrderOpenPrice() > short_sl_size ||
 			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
-				ClosePosition(OrderTicket());
+				//ClosePosition(OrderTicket());
+				PutTicketCloseQueue(OrderTicket());
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 			}
-		}
+		}		
 	}
+	
+	ClearTicketCloseQueue();	
 }
 
 
