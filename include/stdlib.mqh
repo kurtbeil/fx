@@ -16,3 +16,5 @@ string StringReplace(string text,string s1,string s2);
 double MinutesBetween(datetime datetime1,datetime datetime2);
 double HoursBetween(datetime datetime1,datetime datetime2);
 double DaysBetween(datetime datetime1,datetime datetime2);
+
+double Round(double value,int  digits) ;

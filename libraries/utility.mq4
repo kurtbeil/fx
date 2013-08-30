@@ -29,6 +29,7 @@ double StandardPointSize() {
 
 double GetSlipPoints() {
 	return (StandardPointSize()*3/Point);
+	//return (0);
 }
 
 int CreatePosition(string symbol,int cmd,double lots,int magic) {

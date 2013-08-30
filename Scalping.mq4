@@ -54,8 +54,8 @@ int max_short_position = 5;
 int init() {
 	long_tp_size = StandardPointSize() * 1.5;
 	long_sl_size =  StandardPointSize() * 10;
-	short_tp_size = StandardPointSize() * 6;
-	short_sl_size = StandardPointSize() * 16;
+	short_tp_size = StandardPointSize() * 1.5;
+	short_sl_size = StandardPointSize() * 10;
 
 	string exportfile = "closelog.csv";
 
@@ -89,7 +89,7 @@ double trading_length = 120;
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
 	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
-	if (true) {
+	if (false) {
 		//if(hh24==0) {
 		//if (  hh24 == 0 ) {
 		return (true);
@@ -101,7 +101,7 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (false) {
+	if (true) {
 		//if ( hh24 == 22 || hh24 == 0 ) {
 		//if (  hh24 == 0 ) {
 		return (true);
@@ -137,44 +137,32 @@ void checkForOpen() {
 }
 
 void checkForClose() {
-	bool ret;
-	int ticket;
-	
-	string timestamp = TimeToStr(TimeCurrent());
-	if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"  ) {
-		Print("PositionCount="+PositionCount(Symbol(),OP_BUY,MAGIC));
-		Print("OrdersTotal="+OrdersTotal());
-	}	
-	
 	int total=OrdersTotal();
 	for(int i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
 		if( OrderMagicNumber()!=MAGIC ) continue;
 		if( OrderSymbol()!=Symbol() ) continue;
+		// 尝试关闭多头头寸
 		if(OrderType() == OP_BUY) {
-			if ( Bid-OrderOpenPrice() > long_tp_size ||
-			        OrderOpenPrice()-Bid > long_sl_size ||
+			if ( Round(Bid-OrderOpenPrice(),5) > long_tp_size ||
+			        Round(OrderOpenPrice()-Bid,5) > long_sl_size ||
 			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
 				//ClosePosition(OrderTicket());
-				PutTicketCloseQueue(OrderTicket());
+				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
-				if (timestamp == "2013.07.01 03:02"  || timestamp == "2013.07.01 03:03"   ) {
-					Print("OrdersTotal="+OrdersTotal());
-				}
 			}
 		}
+		// 尝试关闭空头头寸
 		if(OrderType() == OP_SELL) {
-			if ( OrderOpenPrice() - Ask > short_tp_size ||
-			        Ask-OrderOpenPrice() > short_sl_size ||
+			if ( Round(OrderOpenPrice() - Ask,5) > short_tp_size ||
+			        Round(Ask - OrderOpenPrice(),5) > short_sl_size ||
 			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
-				//ClosePosition(OrderTicket());
-				PutTicketCloseQueue(OrderTicket());
+				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 			}
-		}		
+		}
 	}
-	
-	ClearTicketCloseQueue();	
+	ClearTicketCloseQueue();  // 将队列中的头寸全部关闭
 }
 
 
