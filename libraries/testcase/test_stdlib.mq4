@@ -52,6 +52,7 @@ void test_Round(){
 	assertDoubleEqual(unit,Round(1.234555,5),1.23456);
 	assertDoubleEqual(unit,Round(-1.234555,5),-1.23456);
 	assertDoubleEqual(unit,Round(0.00000001,5),0);
+	assertDoubleEqual(unit,Round((1.36979-1.36964),5),0.00015);	
 }
 
 

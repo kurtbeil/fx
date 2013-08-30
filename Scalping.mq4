@@ -45,15 +45,15 @@ double short_tp_size = 0;
 double short_sl_size = 0;
 
 // Rsi信号发生器设置
-double long_rsi_level = 30;
+double long_rsi_level = 32;
 double short_rsi_level = 70;
 double rsi_period = 7;
 int max_long_position = 5;
 int max_short_position = 5;
 
 int init() {
-	long_tp_size = StandardPointSize() * 1.5;
-	long_sl_size =  StandardPointSize() * 10;
+	long_tp_size = StandardPointSize() * 0.5;
+	long_sl_size =  StandardPointSize() * 19.5;
 	short_tp_size = StandardPointSize() * 1.5;
 	short_sl_size = StandardPointSize() * 10;
 
@@ -89,7 +89,7 @@ double trading_length = 120;
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
 	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
-	if (false) {
+	if (true) {
 		//if(hh24==0) {
 		//if (  hh24 == 0 ) {
 		return (true);
@@ -101,7 +101,7 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (true) {
+	if (false) {
 		//if ( hh24 == 22 || hh24 == 0 ) {
 		//if (  hh24 == 0 ) {
 		return (true);
@@ -146,7 +146,7 @@ void checkForClose() {
 		if(OrderType() == OP_BUY) {
 			if ( Round(Bid-OrderOpenPrice(),5) > long_tp_size ||
 			        Round(OrderOpenPrice()-Bid,5) > long_sl_size ||
-			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
+			        MinutesBetween(TimeCurrent(),OrderOpenTime()) >= trading_length ) {
 				//ClosePosition(OrderTicket());
 				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
@@ -156,7 +156,7 @@ void checkForClose() {
 		if(OrderType() == OP_SELL) {
 			if ( Round(OrderOpenPrice() - Ask,5) > short_tp_size ||
 			        Round(Ask - OrderOpenPrice(),5) > short_sl_size ||
-			        MinutesBetween(TimeCurrent(),OrderOpenTime()) > trading_length ) {
+			        MinutesBetween(TimeCurrent(),OrderOpenTime()) >= trading_length ) {
 				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 			}
@@ -164,8 +164,6 @@ void checkForClose() {
 	}
 	ClearTicketCloseQueue();  // 将队列中的头寸全部关闭
 }
-
-
 
 
 double getLots() {
@@ -195,6 +193,7 @@ int start() {
 		//	Print("Bid="+Bid);
 		//}
 	}
+
 }
 
 
