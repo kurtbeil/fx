@@ -53,17 +53,17 @@ double short_tp_size = 0;
 double short_sl_size = 0;
 
 // Rsi信号发生器设置
-double long_rsi_level = 30;
-double short_rsi_level = 70;
+double long_rsi_level = 34;
+double short_rsi_level = 71;
 double rsi_period = 7;
 int max_long_position = 5;
 int max_short_position = 5;
 
 int init() {
-	long_tp_size = StandardPointSize() * 1.5;
-	long_sl_size =  StandardPointSize() * 15;
-	short_tp_size = StandardPointSize() * 1.5;
-	short_sl_size = StandardPointSize() * 15;
+	long_tp_size = StandardPointSize() * 10;
+	long_sl_size =  StandardPointSize() *  7;
+	short_tp_size = StandardPointSize() * 6.5;
+	short_sl_size = StandardPointSize() * 10;
 
 	string exportfile = "closelog.csv";
 
@@ -97,8 +97,8 @@ double trading_length = 120;
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
 	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
-	if (false) {
-		//if(hh24==0) {
+	//if (true) {
+	if(hh24==0) {
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
@@ -109,9 +109,9 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (true) {
+	//if (false) {
 		//if ( hh24 == 22 || hh24 == 0 ) {
-		//if (  hh24 == 0 ) {
+	if (  hh24 == 0 ) {
 		return (true);
 	} else {
 		return (false);
@@ -197,8 +197,8 @@ int start() {
 		checkForOpen();
 		checkForClose();
 		//string timestamp = TimeToStr(TimeCurrent());
-		//if (timestamp == "2013.07.01 00:46"  || timestamp == "2013.07.01 00:47"  || timestamp == "2013.07.01 00:48"  ) {
-		//	Print("Bid="+Bid);
+		//if (timestamp == "2013.07.05 00:00" ) {
+		//	Print("here here !");
 		//}
 	}
 

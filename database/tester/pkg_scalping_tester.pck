@@ -118,10 +118,11 @@ create or replace package pkg_scalping_tester is
     N    NUMBER,
     ASK  NUMBER,
     BID  NUMBER,
+    time1 DATE,
     N1   NUMBER,
     ASK1 NUMBER,
     BID1 NUMBER
-  ); 
+  );
 
   create table tb_st_rsi_trading_detail
   (
@@ -288,10 +289,10 @@ create or replace package body pkg_scalping_tester is
     execute immediate 'truncate table tb_st_trading_data_mix';
     insert /*+append*/
     into tb_st_trading_data_mix
-      select a.time, a.n, a.ask, a.bid, b.n n1, b.ask ask1, b.bid bid1
+      select a.time, a.n, a.ask, a.bid, b.time time1, b.n n1, b.ask ask1, b.bid bid1
         from tb_st_trading_data a, tb_st_trading_data b
        where a.n < b.n
-         and b.n <= a.n + i_len;
+         and b.n <= a.n + i_len ;
     commit;
     log('load_trading_data:½áÊø');
   end;
@@ -317,7 +318,8 @@ create or replace package body pkg_scalping_tester is
       union
       select n, max(n1) n1, 0 tp, 0 sl, 1 cl
         from tb_st_trading_data_mix
-       where n1 - n <= i_len
+      --where n1 - n <= i_len
+       where (time1 - time) * 1440 <= i_len 
        group by n;
     commit;
     delete /*+rule*/
@@ -344,7 +346,8 @@ create or replace package body pkg_scalping_tester is
       union
       select n, max(n1) n1, 0 tp, 0 sl, 1 cl
         from tb_st_trading_data_mix
-       where n1 - n <= i_len
+      --where n1 - n <= i_len
+       where (time1 - time) * 1440 <= i_len 
        group by n;
     commit;
     delete /*+rule*/
@@ -632,8 +635,9 @@ create or replace package body pkg_scalping_tester is
   begin
     --load_trading_data('duh0829_1',120);
     --load_trading_data('duh0829_2',120);
+    --load_trading_data('DUH0902_1', 120);
     clear_log;
-    get_data('duh0829_1');
+    get_data('DUH0902_1');
   end;
 
 /*
