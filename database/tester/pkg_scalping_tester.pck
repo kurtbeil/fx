@@ -39,7 +39,7 @@ select table_name, colcnt + 1 column_id, ');'
   from sql1
  where column_id = 1;
 
-*/ 
+*/
 
 /* 
 -- 创建序列  
@@ -340,6 +340,12 @@ create or replace package body pkg_scalping_tester is
          and c.type = b.type(+);
     commit;
   
+    -- 周五的23点以后不在进行交易 
+    delete tb_st_rsi_trading
+     where to_char(time, 'D') = '6' -- 周五
+       and to_char(time, 'hh24:mi') >= '23:00';
+    commit;
+  
     log('get_rsi_trading:结束');
   end;
 
@@ -602,7 +608,7 @@ create or replace package body pkg_scalping_tester is
     --load_trading_data('duh0829_2',120);
     --load_trading_data('DUH0902_1', 120);
     --get_rsi_trading(30, 70);
-    get_data('duh0829_1');
+    get_data('DUH0902_3');
   end;
 
 /*
@@ -681,6 +687,21 @@ select tp_level,
  where type = 'short'
    and hh24 = '00'
    and cnt > 1;
+*/
+
+/*
+drop table duh0921_1;
+create table duh0921_1 as 
+--select * from tb_st_rsi_trading_detail where tp_level = 5 and sl_level = 10 and rsi in (30,70);
+select * from tb_st_rsi_trading_detail where tp_level = 2 and sl_level = 10 and rsi in (35,65);
+select a.n,
+       a.time,
+       a.close_by,
+       decode(a.type, 'long', b.ask, 'short', b.bid, 0) open_price,
+       decode(a.type, 'long', c.bid, 'short', c.ask, 0) close_price
+  from duh0921_1 a, tb_st_trading_data b, tb_st_trading_data c
+ where a.n = b.n
+   and a.n1 = c.n;
 */
 
 end pkg_scalping_tester;

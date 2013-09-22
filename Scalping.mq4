@@ -19,7 +19,7 @@ commit id : fb09c1c53a00a6967b7bf9503e7847f9397c57ff
 之前通过 pyfx/scalping/pkg_luoyu_test 数据进行计算的出一些结论，现将这些结论应用在本交易程序中，
 主要是：
   1、多空头寸需要不同的tp和sl设定。
-  2、多空交易时间段也应有所区别。 
+  2、多空交易时间段也应有所区别。
   3、rsi的信号范围应有所区别
 
 里程碑:
@@ -53,17 +53,17 @@ double short_tp_size = 0;
 double short_sl_size = 0;
 
 // Rsi信号发生器设置
-double long_rsi_level = 34;
-double short_rsi_level = 71;
+double long_rsi_level = 30;
+double short_rsi_level = 70;
 double rsi_period = 7;
 int max_long_position = 5;
 int max_short_position = 5;
 
 int init() {
-	long_tp_size = StandardPointSize() * 10;
-	long_sl_size =  StandardPointSize() *  7;
-	short_tp_size = StandardPointSize() * 6.5;
-	short_sl_size = StandardPointSize() * 10;
+	long_tp_size = StandardPointSize() * 2.5;
+	long_sl_size =  StandardPointSize() *  12;
+	short_tp_size = StandardPointSize() * 2.5;
+	short_sl_size = StandardPointSize() * 12;
 
 	string exportfile = "closelog.csv";
 
@@ -97,8 +97,8 @@ double trading_length = 120;
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
 	//if ( hh24 == 23 || hh24 == 0 || hh24 == 1 || hh24 == 2 ) {
-	//if (true) {
-	if(hh24==0) {
+	if (true) {
+		//if(hh24==0) {
 		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
@@ -109,9 +109,9 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	//if (false) {
+	if (true) {
 		//if ( hh24 == 22 || hh24 == 0 ) {
-	if (  hh24 == 0 ) {
+		//if (  hh24 == 0 ) {
 		return (true);
 	} else {
 		return (false);
@@ -120,6 +120,8 @@ bool isShortTradingHour() {
 
 
 void checkForOpen() {
+
+    if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
 	// 计算对应的rsi0值
 	double rsi0 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,0);
 	double rsi1 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,1);
@@ -145,8 +147,12 @@ void checkForOpen() {
 }
 
 void checkForClose() {
-	int total=OrdersTotal();
-	for(int i=0; i<total; i++) {
+	int total;
+	int i;
+
+	// 遍历所有已开头寸检查是否满足平仓的条件
+	total=OrdersTotal();
+	for(i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
 		if( OrderMagicNumber()!=MAGIC ) continue;
 		if( OrderSymbol()!=Symbol() ) continue;
@@ -168,6 +174,18 @@ void checkForClose() {
 				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 				closelog(TimeToStr(OrderOpenTime())+","+TimeToStr(OrderCloseTime())+","+OrderOpenPrice()+","+OrderOpenPrice());
 			}
+		}
+	}
+	ClearTicketCloseQueue();  // 将队列中的头寸全部关闭
+
+	// 时间进入周五的23:30以后,市场即将关闭,马上关闭所有头寸
+	if ( DayOfWeek()== 5  &&  Hour() == 23 &&  Minute() > 30 ) {
+		total=OrdersTotal();
+		for(i=0; i<total; i++) {
+			if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
+			if( OrderMagicNumber()!=MAGIC ) continue;
+			if( OrderSymbol()!=Symbol() ) continue;
+			PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 		}
 	}
 	ClearTicketCloseQueue();  // 将队列中的头寸全部关闭

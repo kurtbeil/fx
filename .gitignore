@@ -8,4 +8,4 @@
 mqlcache.dat
 *.log
 *.orig
-
+/scripts/lparams.txt
