@@ -693,15 +693,16 @@ select tp_level,
 drop table duh0921_1;
 create table duh0921_1 as 
 --select * from tb_st_rsi_trading_detail where tp_level = 5 and sl_level = 10 and rsi in (30,70);
-select * from tb_st_rsi_trading_detail where tp_level = 2 and sl_level = 10 and rsi in (35,65);
-select a.n,
-       a.time,
+select * from tb_st_rsi_trading_detail where tp_level = 2.5 and sl_level = 12 and rsi in (30,70);
+select a.n,       
        a.close_by,
+       to_char(a.time,'yyyy.mm.dd hh24:mi') open_time,
        decode(a.type, 'long', b.ask, 'short', b.bid, 0) open_price,
+       to_char(c.time,'yyyy.mm.dd hh24:mi') open_time,
        decode(a.type, 'long', c.bid, 'short', c.ask, 0) close_price
   from duh0921_1 a, tb_st_trading_data b, tb_st_trading_data c
  where a.n = b.n
-   and a.n1 = c.n;
+   and a.n1 = c.n order by a.n;
 */
 
 end pkg_scalping_tester;
