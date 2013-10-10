@@ -7,9 +7,10 @@
 /*
  使用布林带实现把头皮战术
  (1)  实现近距离限价单的能力
- (2)  是否引入信号关闭机制
- (3)  
- 
+ (2)  使用分段函数结束头寸
+ (3)  是否引入信号关闭机制
+ (4)  不要再周一凌晨进行交易
+
 */
 
 
@@ -24,8 +25,8 @@ double short_sl_size = 0;
 double long_rsi_level = 25;
 double short_rsi_level = 83;
 double rsi_period = 7;
-int max_long_position = 5;
-int max_short_position = 5;
+int max_long_position = 1;
+int max_short_position = 1;
 
 int init() {
 	long_tp_size = StandardPointSize() * 2;
@@ -58,13 +59,13 @@ void closelog(string msg) {
 
 
 // 交易最长时间范围设定
-double trading_length = 120;
+double trading_length = 1200;
 
 
 // 多头交易的时间范围
 bool isLongTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (  hh24 == 0 || hh24 == 1  ) {
+	if (  hh24==23 || hh24 == 0 || hh24 == 1  ) {
 		return (true);
 	} else {
 		return (false);
@@ -74,7 +75,7 @@ bool isLongTradingHour() {
 // 空头交易的时间范围
 bool isShortTradingHour() {
 	int hh24 = TimeHour(TimeCurrent());
-	if (  hh24 == 0 || hh24 == 1 ) {
+	if (  hh24==23 || hh24 == 0 || hh24 == 1 ) {
 		return (true);
 	} else {
 		return (false);
@@ -84,26 +85,28 @@ bool isShortTradingHour() {
 
 void checkForOpen() {
 
-    if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
-	// 计算对应的rsi0值
-	double rsi0 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,0);
-	double rsi1 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,1);
+	if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
+	// 计算对应的布林带的值
+	double bands_high  = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_UPPER,1);
+	double  bands_low = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_LOWER,1);
 	// 计算当前的时间段
-	int hh24 = TimeHour(TimeCurrent());
+	//int hh24 = TimeHour(TimeCurrent());
 
-	if ( isLongTradingHour() ) {
-		if (PositionCount(Symbol(),OP_BUY,MAGIC) + 1 <=  max_long_position ) {
-			if ( rsi1 <= long_rsi_level  &&  rsi0 > long_rsi_level ) {
-				// open a buy opsition
-				CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
+	if ((bands_high-bands_low) * 10000 > 5.5) {
+		if ( isLongTradingHour() ) {
+			if (PositionCount(Symbol(),OP_BUY,MAGIC) + 1 <=  max_long_position ) {
+				if ( Low[1] < bands_low ) {
+					// open a buy opsition
+					CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
+				}
 			}
 		}
-	}
-	if ( isShortTradingHour() ) {
-		if (PositionCount(Symbol(),OP_SELL,MAGIC)  + 1 <= max_short_position) {
-			if ( rsi1 >= short_rsi_level  &&  rsi0 < short_rsi_level ) {
-				// open a sell opsition
-				CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
+		if ( isShortTradingHour() ) {
+			if (PositionCount(Symbol(),OP_SELL,MAGIC)  + 1 <= max_short_position) {
+				if ( High[1] > bands_high ) {
+					// open a sell opsition
+					CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
+				}
 			}
 		}
 	}
