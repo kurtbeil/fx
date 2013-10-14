@@ -6,29 +6,8 @@
 #property library
 
 #include <stdlib.mqh>
+#include <testlib.mqh>
 
-int error=0;
-int assert=0;
-
-void printAssertResul() {
-	Print("Test:"+assert+"assert process,pass:"+(assert - error)+",fail:"+error);
-}
-
-void assertStringEqual(string unit,string s1,string s2) {
-	assert ++ ;
-	if (s1!=s2) {
-		Print(unit + " :Assert Fail,s1=\"" + s1 + "\",s2=\"" + s2+"\"");
-		error ++ ;
-	}
-}
-
-void assertDoubleEqual(string unit,double d1,double d2) {
-	assert ++ ;
-	if (d1!=d2) {
-		Print(unit + " :Assert Fail,d1=\"" + d1 + "\",d2=\"" + d2+"\"");
-		error ++ ;
-	}
-}
 
 
 void test_StringReplace() {
@@ -57,8 +36,11 @@ void test_Round(){
 
 
 int test_stdlib() {
+	Print("-------------test_stdlib begin--------------");
 	test_StringReplace();
-	test_Round();
+	test_Round();	
+	printAssertResul();	
+	Print("-------------test_stdlib end----------------");
 }
 
 

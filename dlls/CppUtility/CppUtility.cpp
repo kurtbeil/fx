@@ -72,7 +72,7 @@ MT4_EXPFUNC void __stdcall GlobalStringSet(int ExecuteId,char * name,char * valu
 
 
 MT4_EXPFUNC char* __stdcall GlobalStringGet(int ExecuteId,char * name){
-	static char buf[512];
+	//static char buf[512];
 	char * result = NULL;
 	::EnterCriticalSection(&_StringParameter); // 锁定变量StringParameter
 	try{
@@ -108,7 +108,7 @@ struct LimitOrder{
 map<int,queue<LimitOrder> > LimitOrderQueen;
 
 
-void CreateLitmitOrder(int ExecuteId,int type,double price,int expdate){
+void CreateLimitOrder(int ExecuteId,int type,double price,int expdate){
 	::EnterCriticalSection(&_LimitOrderQueen);   // 锁定变量LimitOrderQueen
     try{
 		if ( LimitOrderQueen.count(ExecuteId) <= 0){
@@ -124,7 +124,7 @@ void CreateLitmitOrder(int ExecuteId,int type,double price,int expdate){
 	::LeaveCriticalSection(&_LimitOrderQueen); // 释放变量LimitOrderQueen 
 }
 
-int GetLitmitOrderCount(int ExecuteId){
+int GetLimitOrderCount(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -138,7 +138,7 @@ int GetLitmitOrderCount(int ExecuteId){
 	return(result);
 }
 
-int GetLitmitOrderType(int ExecuteId){
+int GetLimitOrderType(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -156,7 +156,7 @@ int GetLitmitOrderType(int ExecuteId){
 	return(result);
 }
 
-double GetLitmitOrderPrice(int ExecuteId){
+double GetLimitOrderPrice(int ExecuteId){
 	double result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -175,7 +175,7 @@ double GetLitmitOrderPrice(int ExecuteId){
 }
 
 
-double GetLitmitOrderExpdate(int ExecuteId){
+int GetLimitOrderExpdate(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -194,7 +194,7 @@ double GetLitmitOrderExpdate(int ExecuteId){
 }
 
 
-void RemoveLitmitOrder(int ExecuteId){
+void RemoveLimitOrder(int ExecuteId){
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
 		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
@@ -206,7 +206,7 @@ void RemoveLitmitOrder(int ExecuteId){
 	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen     
 }
 
-void TurnLitmitOrder(int ExecuteId){
+void TurnLimitOrder(int ExecuteId){
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
 		if ( LimitOrderQueen.count(ExecuteId) > 0){ 

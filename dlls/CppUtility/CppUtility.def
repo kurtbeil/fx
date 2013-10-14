@@ -2,3 +2,10 @@ LIBRARY CppUtility
  EXPORTS GlobalStringSet
 		 GlobalStringGet
 		 GenerateExecuteId
+		 CreateLimitOrder
+		 GetLimitOrderCount
+		 GetLimitOrderType
+		 GetLimitOrderPrice
+		 GetLimitOrderExpdate
+		 RemoveLimitOrder
+		 TurnLimitOrder
