@@ -292,7 +292,7 @@ create or replace package body pkg_scalping_tester is
       select a.time, a.n, a.ask, a.bid, b.time time1, b.n n1, b.ask ask1, b.bid bid1
         from tb_st_trading_data a, tb_st_trading_data b
        where a.n < b.n
-         and b.n <= a.n + i_len ;
+         and b.n <= a.n + i_len;
     commit;
     log('load_trading_data:½áÊø');
   end;
@@ -319,7 +319,7 @@ create or replace package body pkg_scalping_tester is
       select n, max(n1) n1, 0 tp, 0 sl, 1 cl
         from tb_st_trading_data_mix
       --where n1 - n <= i_len
-       where (time1 - time) * 1440 <= i_len 
+       where (time1 - time) * 1440 <= i_len
        group by n;
     commit;
     delete /*+rule*/
@@ -347,7 +347,7 @@ create or replace package body pkg_scalping_tester is
       select n, max(n1) n1, 0 tp, 0 sl, 1 cl
         from tb_st_trading_data_mix
       --where n1 - n <= i_len
-       where (time1 - time) * 1440 <= i_len 
+       where (time1 - time) * 1440 <= i_len
        group by n;
     commit;
     delete /*+rule*/
@@ -637,7 +637,12 @@ create or replace package body pkg_scalping_tester is
     --load_trading_data('duh0829_2',120);
     --load_trading_data('DUH0902_1', 120);
     clear_log;
-    get_data('DUH0902_1');
+    get_data('tb_hfmarketsltd_eurcad_m1_30p');
+    execute immediate '
+      create table tb_st_rsi_trading_stat_30p as select * from tb_st_rsi_trading_stat ';
+    execute immediate '      
+      create table tb_st_rsi_trading_detail_30p as select * from tb_st_rsi_trading_detail_1 ';
+    log('test01:30pÍê³É');
   end;
 
 /*
