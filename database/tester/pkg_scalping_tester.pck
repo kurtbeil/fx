@@ -11,217 +11,73 @@ create or replace package pkg_scalping_tester is
   procedure test03;
 
 -- 建立相关的数据结构
-/* 
-  -- Create sequence 
-  create sequence SEQ_LOG
-  minvalue 1
-  maxvalue 999999999999999999999999999
-  start with 1
-  increment by 1
-  cache 20;
-  
-  -- Create table
-  create table TB_ST_LOG
-  (
-    LOG_ID   NUMBER,
-    LOG_DATE DATE,
-    LOG_MSG  VARCHAR2(4000)
-  );
-  -- Create table
-  create table TB_ST_PROFIT_SLICE
-  (
-    TP_LEVEL NUMBER,
-    SL_LEVEL NUMBER,
-    LEN      NUMBER,
-    TYPE     VARCHAR2(10),
-    TIME     DATE,
-    N        NUMBER,
-    N1       NUMBER,
-    TP       NUMBER,
-    SL       NUMBER,
-    CL       NUMBER,
-    PROFIT   NUMBER
-  );
-  
-  create table TB_ST_PROFIT_SLICE_BAK
-  (
-    TP_LEVEL NUMBER,
-    SL_LEVEL NUMBER,
-    LEN      NUMBER,
-    TYPE     VARCHAR2(10),
-    TIME     DATE,
-    N        NUMBER,
-    N1       NUMBER,
-    TP       NUMBER,
-    SL       NUMBER,
-    CL       NUMBER,
-    PROFIT   NUMBER
-  );
-  
-  create table TB_ST_PROFIT_SLICE_LONG
-  (
-    N  NUMBER,
-    N1 NUMBER,
-    TP NUMBER,
-    SL NUMBER,
-    CL NUMBER
-  );
-  create index TB_ST_PROFIT_SLICE_LONG_i1 on TB_ST_PROFIT_SLICE_LONG (N);
-  
-  create table TB_ST_PROFIT_SLICE_SHORT
-  (
-    N  NUMBER,
-    N1 NUMBER,
-    TP NUMBER,
-    SL NUMBER,
-    CL NUMBER
-  );
-  create index TB_ST_PROFIT_SLICE_SHORT_I1 on TB_ST_PROFIT_SLICE_SHORT (N);
-  
-  -- Create table
-  create table TB_ST_RSI_TRADING
-  (
-    TIME DATE,
-    N    NUMBER,
-    TYPE varchar2(10),
-    RSI  NUMBER
-  );
-  
-  create table TB_ST_RSI_TRADING_BAK
-  (
-    TIME DATE,
-    N    NUMBER,
-    TYPE varchar2(10),
-    RSI  NUMBER
-  );
-  
-  -- Create table
-  create table TB_ST_TRADING_DATA
-  (
-    TIME   DATE,
-    OPEN   NUMBER,
-    CLOSE  NUMBER,
-    HIGH   NUMBER,
-    LOW    NUMBER,
-    VOLUME NUMBER,
-    ASK    NUMBER,
-    BID    NUMBER,
-    RSI    NUMBER,    
-    RSI1   NUMBER,
-    N      NUMBER         
-  );
-  create index TB_ST_TRADING_DATA_I1 on TB_ST_TRADING_DATA (N);
-  
-  create table TB_ST_TRADING_DATA_MIX
-  (
-    TIME DATE,
-    N    NUMBER,
-    ASK  NUMBER,
-    BID  NUMBER,
-    time1 DATE,
-    N1   NUMBER,
-    ASK1 NUMBER,
-    BID1 NUMBER
-  );
+/*
 
-  create table tb_st_rsi_trading_detail
-  (
-    TP_LEVEL     NUMBER,
-    SL_LEVEL     NUMBER,
-    LEN          NUMBER,
-    TYPE         VARCHAR2(10),
-    TIME         DATE,
-    N            NUMBER,
-    N1           NUMBER,
-    TP           NUMBER,
-    SL           NUMBER,
-    CL           NUMBER,
-    PROFIT       NUMBER,
-    HH24         VARCHAR2(2),
-    RSI          NUMBER,
-    G            NUMBER,
-    GCNT         NUMBER,
-    M            NUMBER,
-    TOTAL_PROFIT NUMBER
-  )
-  create index TB_ST_RSI_TRADING_DETAIL_I1 on TB_ST_RSI_TRADING_DETAIL (G);
+with sql1 as
+ (select table_name,
+         column_name,
+         data_type,
+         data_length,
+         column_id,
+         count(*) over(partition by table_name) colcnt
+    from user_tab_cols
+   where table_name like 'TB_ST%'
+     and table_name not like '%20%'
+     and table_name not like '%35%'
+     and table_name not like '%40%')
+select table_name, column_id, --
+'  ' || column_name || ' ' || data_type || --
+case when data_type in ('VARCHAR2', 'VARCHAR', 'CHAR') then '(' || to_char(data_length) || ')' else '' end || --
+case when column_id = colcnt then '' else ',' end scripts
+  from sql1 a
+union
+select table_name, 0 column_id, 'create table ' || table_name || ' ('
+  from sql1
+ where column_id = 1
+union
+select table_name, colcnt + 1 column_id, ');'
+  from sql1
+ where column_id = 1;
+
+*/ 
+
+/* 
+-- 创建序列  
+create sequence SEQ_LOG
+minvalue 1
+maxvalue 999999999999999999999999999
+start with 1
+increment by 1
+cache 20;
+ 
+-- 创建索引
+create index TB_ST_PROFIT_SLICE_LONG_i1 on TB_ST_PROFIT_SLICE_LONG (N);
+create index TB_ST_PROFIT_SLICE_SHORT_I1 on TB_ST_PROFIT_SLICE_SHORT (N);
+create index TB_ST_TRADING_DATA_I1 on TB_ST_TRADING_DATA (N);
+create index TB_ST_RSI_TRADING_DETAIL_I1 on TB_ST_RSI_TRADING_DETAIL (G);
+create index tb_st_rsi_trading_detail_1_i1 on tb_st_rsi_trading_detail_1(g);
   
-  create table tb_st_rsi_trading_detail_fit
-  (
-    G   NUMBER,
-    CNT NUMBER,
-    B1  NUMBER,
-    B0  NUMBER
-  );
+-- 修改表nolgging属性
+alter table tb_st_trading_data nologging;
+alter table tb_st_trading_data_mix nologging;
+alter table tb_st_profit_slice_long nologging;
+alter table tb_st_profit_slice_short nologging;
+alter table tb_st_profit_slice nologging;
+alter table tb_st_rsi_trading nologging;
+alter table tb_st_rsi_trading_detail nologging;
+alter table tb_st_rsi_trading_detail_fit nologging;
+alter table tb_st_rsi_trading_detail_0 nologging;
+alter table tb_st_rsi_trading_detail_1 nologging;
+alter table tb_st_rsi_trading_stat nologging;  
+alter table tb_st_profit_slice_bak nologging;
+alter table tb_st_rsi_trading_bak nologging;
   
-  create table tb_st_rsi_trading_detail_1
-  (
-    TP_LEVEL             NUMBER,
-    SL_LEVEL             NUMBER,
-    LEN                  NUMBER,
-    TYPE                 VARCHAR2(10),
-    TIME                 DATE,
-    N                    NUMBER,
-    N1                   NUMBER,
-    TP                   NUMBER,
-    SL                   NUMBER,
-    CL                   NUMBER,
-    PROFIT               NUMBER,
-    HH24                 VARCHAR2(2),
-    RSI                  NUMBER,
-    G                    NUMBER,
-    GCNT                 NUMBER,
-    M                    NUMBER,
-    TOTAL_PROFIT         NUMBER,
-    PREDICT_TOTAL_PROFIT NUMBER,
-    DEVIATION            NUMBER
-  );
-  create index tb_st_rsi_trading_detail_1_i1 on tb_st_rsi_trading_detail_1(g);
-  
-  create table tb_st_rsi_trading_stat
-  (
-    G             NUMBER,
-    TP_LEVEL      NUMBER,
-    SL_LEVEL      NUMBER,
-    LEN           NUMBER,
-    TYPE          VARCHAR2(10),
-    HH24          VARCHAR2(2),
-    RSI           NUMBER,
-    CNT           NUMBER,
-    TP            NUMBER,
-    SL            NUMBER,
-    CL            NUMBER,
-    PROFIT        NUMBER,
-    TP_PROFIT     NUMBER,
-    SL_PROFIT     NUMBER,
-    CL_PROFIT     NUMBER,
-    TP_PCT        NUMBER,
-    SL_PCT        NUMBER,
-    CL_PCT        NUMBER,
-    DEVIATION     NUMBER,
-    AVG_DEVIATION NUMBER,
-    R1            NUMBER,
-    R2            NUMBER,
-    R3            NUMBER
-  );
-  alter table tb_st_trading_data nologging;
-  alter table tb_st_trading_data_mix nologging;
-  alter table tb_st_profit_slice_long nologging;
-  alter table tb_st_profit_slice_short nologging;
-  alter table tb_st_profit_slice nologging;
-  alter table tb_st_rsi_trading nologging;
-  alter table tb_st_rsi_trading_detail nologging;
-  alter table tb_st_rsi_trading_detail_fit nologging;
-  alter table tb_st_rsi_trading_detail_1 nologging;
-  alter table tb_st_rsi_trading_stat nologging;  
-  alter table tb_st_profit_slice_bak nologging;
-  alter table tb_st_rsi_trading_bak nologging;
-  
-  alter index tb_st_profit_slice_short_i1 nologging;
-  alter index tb_st_profit_slice_long_i1 nologging;
-  alter index tb_st_rsi_trading_detail_i1 nologging;
-  alter index tb_st_trading_data_i1 nologging;
-  alter index tb_st_rsi_trading_detail_1_i1 nologging;
+-- 修改索引nolgging属性
+alter index tb_st_profit_slice_short_i1 nologging;
+alter index tb_st_profit_slice_long_i1 nologging;
+alter index tb_st_rsi_trading_detail_i1 nologging;
+alter index tb_st_trading_data_i1 nologging;
+alter index tb_st_rsi_trading_detail_1_i1 nologging;
   
   */
 
@@ -306,17 +162,17 @@ create or replace package body pkg_scalping_tester is
     execute immediate 'truncate table tb_st_profit_slice_long';
     insert /*+append*/
     into tb_st_profit_slice_long
-      select n, min(n1) n1, 1 tp, 0 sl, 0 cl
+      select n, min(n1) n1, 1 tp, 0 sl, 0 cl, 'take profit' close_by
         from tb_st_trading_data_mix
        where (bid1 - ask) * 10000 > i_tp_level
        group by n
       union
-      select n, min(n1) n1, 0 tp, 1 sl, 0 cl
+      select n, min(n1) n1, 0 tp, 1 sl, 0 cl, 'stop loss' close_by
         from tb_st_trading_data_mix
        where (bid1 - ask) * 10000 < -i_sl_level
        group by n
       union
-      select n, max(n1) n1, 0 tp, 0 sl, 1 cl
+      select n, max(n1) n1, 0 tp, 0 sl, 1 cl, 'trading length' close_by
         from tb_st_trading_data_mix
       --where n1 - n <= i_len
        where (time1 - time) * 1440 <= i_len
@@ -334,17 +190,17 @@ create or replace package body pkg_scalping_tester is
     execute immediate 'truncate table tb_st_profit_slice_short';
     insert /*+append*/
     into tb_st_profit_slice_short
-      select n, min(n1) n1, 1 tp, 0 sl, 0 cl
+      select n, min(n1) n1, 1 tp, 0 sl, 0 cl, 'take profit' close_by
         from tb_st_trading_data_mix
        where (bid - ask1) * 10000 > i_tp_level
        group by n
       union
-      select n, min(n1) n1, 0 tp, 1 sl, 0 cl
+      select n, min(n1) n1, 0 tp, 1 sl, 0 cl, 'stop loss' close_by
         from tb_st_trading_data_mix
        where (bid - ask1) * 10000 < -i_sl_level
        group by n
       union
-      select n, max(n1) n1, 0 tp, 0 sl, 1 cl
+      select n, max(n1) n1, 0 tp, 0 sl, 1 cl, 'trading length' close_by
         from tb_st_trading_data_mix
       --where n1 - n <= i_len
        where (time1 - time) * 1440 <= i_len
@@ -372,7 +228,8 @@ create or replace package body pkg_scalping_tester is
              a.tp,
              a.sl,
              a.cl,
-             (c.bid - b.ask) * 10000 profit
+             --(c.bid - b.ask) * 10000 profit
+             a.close_by
         from tb_st_profit_slice_long a, tb_st_trading_data b, tb_st_trading_data c
        where a.n = b.n(+)
          and a.n1 = c.n(+);
@@ -389,7 +246,8 @@ create or replace package body pkg_scalping_tester is
              a.tp,
              a.sl,
              a.cl,
-             (b.bid - c.ask) * 10000 profit
+             --(b.bid - c.ask) * 10000 profit
+             a.close_by
         from tb_st_profit_slice_short a, tb_st_trading_data b, tb_st_trading_data c
        where a.n = b.n(+)
          and a.n1 = c.n(+);
@@ -403,27 +261,10 @@ create or replace package body pkg_scalping_tester is
   begin
     log('get_rsi_trading(' || to_char(i_long_rsi) || ',' || to_char(i_short_rsi) ||
         '):开始');
-    /* -- RSI生成规则1  
-    execute immediate 'truncate table tb_st_rsi_trading';
-    insert \*+append*\
-    into tb_st_rsi_trading
-      select a.time, a.n, 'long' type, i_long_rsi
-        from tb_st_trading_data a, tb_st_trading_data b
-       where a.n = b.n + 1
-         and b.rsi <= i_long_rsi
-         and a.rsi > i_long_rsi
-      union all
-      select a.time, a.n, 'short' type, i_short_rsi
-        from tb_st_trading_data a, tb_st_trading_data b
-       where a.n = b.n + 1
-         and b.rsi >= i_short_rsi
-         and a.rsi < i_short_rsi;
-    commit;
-    */
-    -- RSI生成规则2
-    execute immediate 'truncate table tb_st_rsi_trading';
+    -- RSI打开头寸规则
+    execute immediate 'truncate table tb_st_rsi_trading_open';
     insert /*+append*/
-    into tb_st_rsi_trading
+    into tb_st_rsi_trading_open
       select a.time, a.n, 'long' type, i_long_rsi
         from tb_st_trading_data a
        where a.rsi1 <= i_long_rsi
@@ -434,6 +275,71 @@ create or replace package body pkg_scalping_tester is
        where a.rsi1 >= i_short_rsi
          and a.rsi < i_short_rsi;
     commit;
+  
+    -- 按规则生成关闭交易点
+    execute immediate 'truncate table tb_st_rsi_trading_close';
+    -- 规则1:RSI关闭头寸规则
+    -- 存在问题：
+    -- 1、这里默认了关闭规则使用对等、反向头寸的开仓信号,实际上应该是可以进行定制的
+    -- 暂时不使用rsi关闭信号关闭头寸
+    /*insert \*+append*\
+    into tb_st_rsi_trading_close
+      select a.time, a.n, 'long' type, i_long_rsi, 'rsi' close_rule
+        from tb_st_trading_data a
+       where a.rsi1 >= i_short_rsi
+         and a.rsi < i_short_rsi
+      union all
+      select a.time, a.n, 'short' type, i_short_rsi, 'rsi' close_rule
+        from tb_st_trading_data a
+       where a.rsi1 <= i_long_rsi
+         and a.rsi > i_long_rsi;
+    commit;*/
+  
+    -- 规则2:每周五的23:30要强行关闭所有头寸
+    insert into tb_st_rsi_trading_close
+      select min(time) time, --
+             min(n) n,
+             'long' type,
+             i_long_rsi,
+             'weekend' close_by
+        from tb_st_trading_data
+       where to_char(time, 'D') = '6' -- 周五
+         and to_char(time, 'hh24:mi') > '23:30'
+       group by to_char(time, 'yyyymmdd')
+      union
+      select min(time) time, min(n) n, 'short' type, i_short_rsi, 'weekend' close_by
+        from tb_st_trading_data
+       where to_char(time, 'D') = '6' -- 周五
+         and to_char(time, 'hh24:mi') > '23:30'
+       group by to_char(time, 'yyyymmdd');
+    commit;
+  
+    -- 规则3:交易数据最后强制关闭所有头寸
+    insert into tb_st_rsi_trading_close
+      select max(time) time, max(n) n, 'long' type, i_long_rsi, 'end' close_rule
+        from tb_st_trading_data
+      union
+      select max(time) time, max(n) n, 'short' type, i_short_rsi, 'end' close_rule
+        from tb_st_trading_data;
+    commit;
+  
+    -- 合并开仓信号和平仓信号
+    execute immediate 'truncate table tb_st_rsi_trading';
+    insert into tb_st_rsi_trading --
+    with sql1 as
+      (select a.n, min(b.n) n1, a.type
+         from tb_st_rsi_trading_open a, tb_st_rsi_trading_close b
+        where b.n > a.n
+          and a.type = b.type
+        group by a.n, a.type)
+      select a.time, a.n, a.type, a.rsi, b.n n1, b.close_by
+        from tb_st_rsi_trading_open a, tb_st_rsi_trading_close b, sql1 c
+       where a.n = c.n(+)
+         and c.n1 = b.n(+)
+         and a.type = c.type(+)
+         and c.type = b.type(+);
+    commit;
+  
     log('get_rsi_trading:结束');
   end;
 
@@ -441,20 +347,78 @@ create or replace package body pkg_scalping_tester is
   begin
     log('get_rsi_trading_stat:开始');
   
-    -- 关联交易记录和对应的获利切片,形成交易明细
-    execute immediate 'truncate table tb_st_rsi_trading_detail';
+    -- 合并套利矩阵切片和RSI信号,形成交易记录，并计算获利情况
+    execute immediate 'truncate table tb_st_rsi_trading_detail_0';
     insert /*+append*/
-    into tb_st_rsi_trading_detail
-      select a.*,
-             to_char(a.time, 'hh24') hh24,
-             b.rsi,
-             dense_rank() over(order by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), b.rsi) g,
-             count(*) over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), b.rsi) gcnt,
-             row_number() over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), b.rsi order by a.n) m,
-             sum(profit) over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), b.rsi order by a.n) total_profit
-        from tb_st_profit_slice_bak a, tb_st_rsi_trading_bak b
+    into tb_st_rsi_trading_detail_0 --
+    with sql1 as
+      (select a.tp_level,
+              a.sl_level,
+              a.len,
+              a.type,
+              a.time,
+              a.n,
+              least(a.n1, b.n1) n1,
+              case
+                when a.n1 < b.n1 then
+                 a.tp
+                else
+                 0
+              end tp,
+              case
+                when a.n1 < b.n1 then
+                 a.sl
+                else
+                 0
+              end sl,
+              case
+                when a.n1 < b.n1 then
+                 a.cl
+                else
+                 1
+              end cl,
+              to_char(a.time, 'hh24') hh24,
+              b.rsi,
+              case
+                when a.n1 < b.n1 then
+                 a.close_by
+                else
+                 b.close_by
+              end close_by
+         from tb_st_profit_slice_bak a, tb_st_rsi_trading_bak b
+        where a.n = b.n
+          and a.type = b.type)
+    --insert into tb_st_rsi_trading_detail_0
+      select a.tp_level,
+             a.sl_level,
+             a.len,
+             a.type,
+             a.time,
+             a.n,
+             a.n1,
+             a.tp,
+             a.sl,
+             a.cl,
+             decode(a.type, 'long', (c.bid - b.ask), 'short', (b.bid - c.ask)) *
+             10000 profit,
+             a.hh24,
+             a.rsi,
+             a.close_by
+        from sql1 a, tb_st_trading_data b, tb_st_trading_data c
        where a.n = b.n
-         and a.type = b.type;
+         and a.n1 = c.n;
+    commit;
+  
+    -- 关联交易记录和对应的获利切片,形成交易明细
+    execute immediate 'truncate table tb_st_rsi_trading_detail_1';
+    insert /*+append*/
+    into tb_st_rsi_trading_detail_1
+      select a.*,
+             dense_rank() over(order by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), a.rsi) g,
+             count(*) over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), a.rsi) gcnt,
+             row_number() over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), a.rsi order by a.n) m,
+             sum(profit) over(partition by a.tp_level, a.sl_level, a.len, a.type, to_char(a.time, 'hh24'), a.rsi order by a.n) total_profit
+        from tb_st_rsi_trading_detail_0 a;
     commit;
   
     -- 通过一元线性回归拟合出"交易次数--累计利润"的直线方程
@@ -470,20 +434,20 @@ create or replace package body pkg_scalping_tester is
                      total_profit y,
                      avg(m) over(partition by g) x0,
                      avg(total_profit) over(partition by g) y0
-                from tb_st_rsi_trading_detail
+                from tb_st_rsi_trading_detail_1
                where gcnt > 1)
        group by g;
     commit;
   
     --  计算每笔交易的离差
-    execute immediate 'truncate table tb_st_rsi_trading_detail_1';
+    execute immediate 'truncate table tb_st_rsi_trading_detail';
     insert /*+append*/
-    into tb_st_rsi_trading_detail_1
+    into tb_st_rsi_trading_detail
       select a.*,
              b0 + b.b1 * a.m predict_total_profit,
              abs(total_profit - (b0 + b.b1 * a.m)) deviation,
              b.b1 k
-        from tb_st_rsi_trading_detail a, tb_st_rsi_trading_detail_fit b
+        from tb_st_rsi_trading_detail_1 a, tb_st_rsi_trading_detail_fit b
        where a.g = b.g(+);
     commit;
   
@@ -519,7 +483,7 @@ create or replace package body pkg_scalping_tester is
       --row_number() over(order by sum(profit) desc) r1,
       --row_number() over(order by sum(tp) / count(*) desc) r2,
       --row_number() over(order by sum(deviation) / count(*)) r3
-        from tb_st_rsi_trading_detail_1
+        from tb_st_rsi_trading_detail
        group by g, tp_level, sl_level, len, type, hh24, rsi;
     commit;
   
@@ -633,16 +597,12 @@ create or replace package body pkg_scalping_tester is
 
   procedure test03 is
   begin
-    --load_trading_data('duh0829_1',120);
+    clear_log;
+    --load_trading_data('duh0829_1', 120);
     --load_trading_data('duh0829_2',120);
     --load_trading_data('DUH0902_1', 120);
-    clear_log;
-    get_data('tb_hfmarketsltd_eurcad_m1_30p');
-    execute immediate '
-      create table tb_st_rsi_trading_stat_30p as select * from tb_st_rsi_trading_stat ';
-    execute immediate '      
-      create table tb_st_rsi_trading_detail_30p as select * from tb_st_rsi_trading_detail_1 ';
-    log('test01:30p完成');
+    --get_rsi_trading(30, 70);
+    get_data('duh0829_1');
   end;
 
 /*
