@@ -5,13 +5,15 @@
 //+------------------------------------------------------------------+
 
 
+int init(){
 
-#include <cutility.mqh>
+  return (-1);  
+}
 
 void start()
 {
-    int  i = 4294967295;
-    Print(i);
+	Print("hellol ");
+    ObjectCreate("text_object", OBJ_TEXT, 0, Time[0], Ask);
 }  
 
 

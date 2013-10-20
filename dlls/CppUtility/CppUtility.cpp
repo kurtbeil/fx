@@ -8,6 +8,9 @@
 // 全局字符串变量的事务锁
 CRITICAL_SECTION _StringParameter; 
 
+// 全局整型变量的事务锁
+CRITICAL_SECTION _IntegerParameter;
+
 // 生成ExecuteId的事务锁
 CRITICAL_SECTION _GenerateExecuteId;
 
@@ -21,6 +24,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 					 )
 {
 	::InitializeCriticalSection(&_StringParameter);
+	::InitializeCriticalSection(&_IntegerParameter);
 	::InitializeCriticalSection(&_GenerateExecuteId);
 	::InitializeCriticalSection(&_LimitOrderQueen);
 	switch (ul_reason_for_call)
@@ -91,6 +95,30 @@ MT4_EXPFUNC char* __stdcall GlobalStringGet(int ExecuteId,char * name){
 	::LeaveCriticalSection(&_StringParameter); // 释放变量StringParameter 	
 	return result;
 }
+
+
+/*----------------------------------------------
+--             全局整型变量功能             --
+-----------------------------------------------*/
+// 保存全局字符串变量的map
+map<int,map<string,int> > IntegerParameter;
+
+MT4_EXPFUNC void __stdcall GlobalIntegerSet(int ExecuteId,char * name,int value){
+	::EnterCriticalSection(&_IntegerParameter); // 锁定变量IntegerParameter
+	try{
+		// 对应的ExecuteId是否已经建立起全局变量集
+		if ( IntegerParameter.count(ExecuteId) <= 0){
+			map<string,int> p;	
+			IntegerParameter[ExecuteId] = p;	       //   注意这里是拷贝
+		}
+		IntegerParameter[ExecuteId][name] = value;  //   这里赋值实际上是通过value先创造出一个string
+	}catch(...){}
+	::LeaveCriticalSection(&_IntegerParameter); // 释放变量IntegerParameter	 
+}
+
+
+
+
 
 
 /*----------------------------------------------

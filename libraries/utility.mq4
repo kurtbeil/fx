@@ -41,16 +41,9 @@ void WriteData(string dataname,string data) {
 	}
 }
 
-int PositionCount(string symbol,int cmd,int magic) {
-	int cnt=0;
-	for( int i=0; i<OrdersTotal(); i++ ) {
-		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
-		if ( OrderSymbol() != symbol ) continue;
-		if ( magic != -1 && OrderMagicNumber() != magic ) continue;
-		if ( OrderType() == cmd ) cnt++ ;
-	}
-	return(cnt);
-}
+
+
+
 
 double StandardPointSize() {
 	return (0.0001);
@@ -61,7 +54,26 @@ double GetSlipPoints() {
 	//return (0);
 }
 
-int CreatePosition(string symbol,int cmd,double lots,int magic) {
+
+// magic 参数需要去掉了  顺带需要修改 scalping.mq4  GetSlipPoints 也需要修改
+int PositionCount(string symbol,int cmd) {
+    int magic = GetExecuteId();
+	int cnt=0;
+	for( int i=0; i<OrdersTotal(); i++ ) {
+		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
+		if ( OrderSymbol() != symbol ) continue;
+		if ( magic != -1 && OrderMagicNumber() != magic ) continue;
+		if ( OrderType() == cmd ) cnt++ ;
+	}
+	return(cnt);
+}
+
+
+
+
+// magic 参数需要去掉了 顺带需要修改 scalping.mq4,  GetSlipPoints 也需要修改
+int CreatePosition(string symbol,int cmd,double lots) {
+	int magic = GetExecuteId();
 	int ticket;
 	if (cmd==OP_BUY) {
 		ticket = OrderSend(symbol,OP_BUY,lots,Ask,GetSlipPoints(),0,0,"",magic,0,Blue);
@@ -71,6 +83,7 @@ int CreatePosition(string symbol,int cmd,double lots,int magic) {
 	}
 	return (ticket);
 }
+
 
 
 void ClosePosition(int ticket) {

@@ -1,8 +1,7 @@
 
 #include <utility.mqh>
 #include <stdlib.mqh>
-
-#define MAGIC  102
+#include <common.mqh>
 
 /*
 
@@ -61,6 +60,8 @@ double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
 
+int magic;
+
 // Rsi信号发生器设置
 double long_rsi_level = 25;
 double short_rsi_level = 83;
@@ -69,6 +70,8 @@ int max_long_position = 5;
 int max_short_position = 5;
 
 int init() {
+   OnInitBegin();	
+    magic = GetExecuteId();
 	long_tp_size = StandardPointSize() * 2;
 	long_sl_size =  StandardPointSize() *  12;
 	short_tp_size = StandardPointSize() * 2;
@@ -83,6 +86,7 @@ int init() {
 		FileWrite(handle,"time,opentime,closetime,openprice,closeprice");
 		FileClose(handle );
 	}
+	
 }
 
 void closelog(string msg) {
@@ -133,18 +137,18 @@ void checkForOpen() {
 	int hh24 = TimeHour(TimeCurrent());
 
 	if ( isLongTradingHour() ) {
-		if (PositionCount(Symbol(),OP_BUY,MAGIC) + 1 <=  max_long_position ) {
+		if (PositionCount(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 			if ( rsi1 <= long_rsi_level  &&  rsi0 > long_rsi_level ) {
 				// open a buy opsition
-				CreatePosition(Symbol(),OP_BUY,getLots(),MAGIC);
+				CreatePosition(Symbol(),OP_BUY,getLots());
 			}
 		}
 	}
 	if ( isShortTradingHour() ) {
-		if (PositionCount(Symbol(),OP_SELL,MAGIC)  + 1 <= max_short_position) {
+		if (PositionCount(Symbol(),OP_SELL)  + 1 <= max_short_position) {
 			if ( rsi1 >= short_rsi_level  &&  rsi0 < short_rsi_level ) {
 				// open a sell opsition
-				CreatePosition(Symbol(),OP_SELL,getLots(),MAGIC);
+				CreatePosition(Symbol(),OP_SELL,getLots());
 			}
 		}
 	}
@@ -158,7 +162,7 @@ void checkForClose() {
 	total=OrdersTotal();
 	for(i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
-		if( OrderMagicNumber()!=MAGIC ) continue;
+		if( OrderMagicNumber()!=magic ) continue;
 		if( OrderSymbol()!=Symbol() ) continue;
 		// 尝试关闭多头头寸
 		if(OrderType() == OP_BUY) {
@@ -187,7 +191,7 @@ void checkForClose() {
 		total=OrdersTotal();
 		for(i=0; i<total; i++) {
 			if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
-			if( OrderMagicNumber()!=MAGIC ) continue;
+			if( OrderMagicNumber()!=magic ) continue;
 			if( OrderSymbol()!=Symbol() ) continue;
 			PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 		}

@@ -2,7 +2,13 @@
 
 #include <CppUtility.mqh>
 #include <testlib.mqh>
+#include <common.mqh>
 
+
+void test_GlobalString(){
+	
+	
+}
 
 
 void test_LimitOrder(){	
@@ -46,6 +52,8 @@ void test_LimitOrder(){
 	assertIntEqual("test_LimitOrder",CppGetLimitOrderType(),-1);	
 	assertDoubleEqual("test_LimitOrder",CppGetLimitOrderPrice(),-1);	
 	assertIntEqual("test_LimitOrder",CppGetLimitOrderExpdate(),-1);		
+	
+	
 }
 
 

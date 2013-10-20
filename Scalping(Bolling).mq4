@@ -1,8 +1,8 @@
 
 #include <utility.mqh>
 #include <stdlib.mqh>
+#include <common.mqh>
 
-#define MAGIC  102
 
 /*
  使用布林带实现把头皮战术
@@ -13,7 +13,7 @@
 
 */
 
-
+int magic;
 
 // 获利范围设置
 double long_tp_size = 0;
@@ -29,6 +29,9 @@ int max_long_position = 1;
 int max_short_position = 1;
 
 int init() {
+	OninitBegin();	
+	magic = magic = GetExecuteId();
+	
 	long_tp_size = StandardPointSize() * 2;
 	long_sl_size =  StandardPointSize() *  12;
 	short_tp_size = StandardPointSize() * 2;
