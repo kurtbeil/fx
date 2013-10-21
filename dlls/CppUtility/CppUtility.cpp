@@ -8,9 +8,6 @@
 // 全局字符串变量的事务锁
 CRITICAL_SECTION _StringParameter; 
 
-// 全局整型变量的事务锁
-CRITICAL_SECTION _IntegerParameter;
-
 // 生成ExecuteId的事务锁
 CRITICAL_SECTION _GenerateExecuteId;
 
@@ -24,7 +21,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 					 )
 {
 	::InitializeCriticalSection(&_StringParameter);
-	::InitializeCriticalSection(&_IntegerParameter);
 	::InitializeCriticalSection(&_GenerateExecuteId);
 	::InitializeCriticalSection(&_LimitOrderQueen);
 	switch (ul_reason_for_call)
@@ -97,29 +93,6 @@ MT4_EXPFUNC char* __stdcall GlobalStringGet(int ExecuteId,char * name){
 }
 
 
-/*----------------------------------------------
---             全局整型变量功能             --
------------------------------------------------*/
-// 保存全局字符串变量的map
-map<int,map<string,int> > IntegerParameter;
-
-MT4_EXPFUNC void __stdcall GlobalIntegerSet(int ExecuteId,char * name,int value){
-	::EnterCriticalSection(&_IntegerParameter); // 锁定变量IntegerParameter
-	try{
-		// 对应的ExecuteId是否已经建立起全局变量集
-		if ( IntegerParameter.count(ExecuteId) <= 0){
-			map<string,int> p;	
-			IntegerParameter[ExecuteId] = p;	       //   注意这里是拷贝
-		}
-		IntegerParameter[ExecuteId][name] = value;  //   这里赋值实际上是通过value先创造出一个string
-	}catch(...){}
-	::LeaveCriticalSection(&_IntegerParameter); // 释放变量IntegerParameter	 
-}
-
-
-
-
-
 
 /*----------------------------------------------
 --        限价单功能辅助数据结构实现          --
@@ -127,8 +100,11 @@ MT4_EXPFUNC void __stdcall GlobalIntegerSet(int ExecuteId,char * name,int value)
 
 
 struct LimitOrder{
+	string symbol;
 	int type;
 	double price;
+	double lots;
+	double slip;
 	int expdate;
 };
 
@@ -136,7 +112,7 @@ struct LimitOrder{
 map<int,queue<LimitOrder> > LimitOrderQueen;
 
 
-void CreateLimitOrder(int ExecuteId,int type,double price,int expdate){
+MT4_EXPFUNC void CreateLimitOrder(int ExecuteId,char * symbol,int type,double price,double lots,double slip,int expdate){
 	::EnterCriticalSection(&_LimitOrderQueen);   // 锁定变量LimitOrderQueen
     try{
 		if ( LimitOrderQueen.count(ExecuteId) <= 0){
@@ -144,15 +120,18 @@ void CreateLimitOrder(int ExecuteId,int type,double price,int expdate){
 			LimitOrderQueen[ExecuteId] = queue;	       //   注意这里是拷贝
 		}
 		LimitOrder order;
+		order.symbol = symbol;
 		order.type = type;
 		order.price = price;
+		order.lots = lots;		
+		order.slip = slip;
 		order.expdate = expdate;
 		LimitOrderQueen[ExecuteId].push(order);        //   注意这里是变量拷贝
 	}catch(...){}
 	::LeaveCriticalSection(&_LimitOrderQueen); // 释放变量LimitOrderQueen 
 }
 
-int GetLimitOrderCount(int ExecuteId){
+MT4_EXPFUNC int GetLimitOrderCount(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -166,7 +145,26 @@ int GetLimitOrderCount(int ExecuteId){
 	return(result);
 }
 
-int GetLimitOrderType(int ExecuteId){
+
+MT4_EXPFUNC char * GetLimitOrderSymbol(int ExecuteId){
+	char * result = NULL;
+	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
+	try{	
+		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
+			if(LimitOrderQueen[ExecuteId].size() > 0){
+				result = (char*)LimitOrderQueen[ExecuteId].front().symbol.c_str();
+			}else{
+				result = NULL;
+			}
+		}else{
+			result = NULL;
+		}
+	}catch(...){}
+	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
+	return(result);
+}
+
+MT4_EXPFUNC int GetLimitOrderType(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -184,7 +182,7 @@ int GetLimitOrderType(int ExecuteId){
 	return(result);
 }
 
-double GetLimitOrderPrice(int ExecuteId){
+MT4_EXPFUNC double GetLimitOrderPrice(int ExecuteId){
 	double result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -202,8 +200,45 @@ double GetLimitOrderPrice(int ExecuteId){
 	return(result);
 }
 
+MT4_EXPFUNC double GetLimitOrderLots(int ExecuteId){
+	double result;
+	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
+	try{	
+		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
+			if(LimitOrderQueen[ExecuteId].size() > 0 ){
+				result = LimitOrderQueen[ExecuteId].front().lots;
+			}else{
+				result = -1;
+			}
+		}else{
+			result = -1;
+		}
+	}catch(...){}
+	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
+	return(result);
+}
 
-int GetLimitOrderExpdate(int ExecuteId){
+
+MT4_EXPFUNC double GetLimitOrderSlip(int ExecuteId){
+	double result;
+	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
+	try{	
+		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
+			if(LimitOrderQueen[ExecuteId].size() > 0 ){
+				result = LimitOrderQueen[ExecuteId].front().slip;
+			}else{
+				result = -1;
+			}
+		}else{
+			result = -1;
+		}
+	}catch(...){}
+	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
+	return(result);
+}
+
+
+MT4_EXPFUNC int GetLimitOrderExpdate(int ExecuteId){
 	int result;
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
@@ -222,7 +257,7 @@ int GetLimitOrderExpdate(int ExecuteId){
 }
 
 
-void RemoveLimitOrder(int ExecuteId){
+MT4_EXPFUNC void RemoveLimitOrder(int ExecuteId){
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
 		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
@@ -234,7 +269,7 @@ void RemoveLimitOrder(int ExecuteId){
 	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen     
 }
 
-void TurnLimitOrder(int ExecuteId){
+MT4_EXPFUNC void TurnLimitOrder(int ExecuteId){
 	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
 	try{	
 		if ( LimitOrderQueen.count(ExecuteId) > 0){ 

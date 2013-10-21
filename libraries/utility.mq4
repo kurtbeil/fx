@@ -4,7 +4,6 @@
 
 
 
-
 string GetFileStamp() {
 	string stamp =  "(" +
 	                "ExecuteId=" + GetExecuteId()  +
@@ -42,9 +41,6 @@ void WriteData(string dataname,string data) {
 }
 
 
-
-
-
 double StandardPointSize() {
 	return (0.0001);
 }
@@ -54,10 +50,18 @@ double GetSlipPoints() {
 	//return (0);
 }
 
+double GetDefaulSlipPoints(string symbol) {
+	double slip = StandardPointSize()*3/Point;
+	if ( symbol == "EURCAD" ) {
+		slip = StandardPointSize()*2/Point;
+	}
+	return(slip);
+}
+
 
 // magic 参数需要去掉了  顺带需要修改 scalping.mq4  GetSlipPoints 也需要修改
 int PositionCount(string symbol,int cmd) {
-    int magic = GetExecuteId();
+	int magic = GetExecuteId();
 	int cnt=0;
 	for( int i=0; i<OrdersTotal(); i++ ) {
 		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
@@ -67,8 +71,6 @@ int PositionCount(string symbol,int cmd) {
 	}
 	return(cnt);
 }
-
-
 
 
 // magic 参数需要去掉了 顺带需要修改 scalping.mq4,  GetSlipPoints 也需要修改
@@ -84,6 +86,17 @@ int CreatePosition(string symbol,int cmd,double lots) {
 	return (ticket);
 }
 
+int CreatePositionAtPrice(string symbol,int cmd,double price,double lots,double slip) {
+	int magic = GetExecuteId();
+	int ticket;
+	if (cmd==OP_BUY) {
+		ticket = OrderSend(symbol,OP_BUY,lots,price,slip,0,0,"",magic,0,Blue);
+	}
+	if (cmd==OP_SELL) {
+		ticket = OrderSend(symbol,OP_SELL,lots,price,slip,0,0,"",magic,0,Red);
+	}
+	return (ticket);
+}
 
 
 void ClosePosition(int ticket) {

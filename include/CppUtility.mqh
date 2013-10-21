@@ -8,10 +8,13 @@ string CppGlobalStringGet(string name);
 string CppGlobalStringSet(string name,string value);
 
 // 近距离限价单功能的数据结构支持
-void CppCreateLimitOrder(int type,double price,int expdate);
+void CppCreateLimitOrder(string symbol,int type,double price,double lots,double slip,int expdate);
 int CppGetLimitOrderCount();
+string CppGetLimitOrderSymbol();
 int CppGetLimitOrderType();
 double CppGetLimitOrderPrice();
+double CppGetLimitOrderLots();
+double CppGetLimitOrderSlip();
 int CppGetLimitOrderExpdate();
 void CppRemoveLimitOrder();
 void CppTurnLimitOrder();

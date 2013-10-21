@@ -4,8 +4,11 @@ LIBRARY CppUtility
 		 GenerateExecuteId
 		 CreateLimitOrder
 		 GetLimitOrderCount
+		 GetLimitOrderSymbol
 		 GetLimitOrderType
 		 GetLimitOrderPrice
+		 GetLimitOrderLots
+		 GetLimitOrderSlip
 		 GetLimitOrderExpdate
 		 RemoveLimitOrder
 		 TurnLimitOrder
