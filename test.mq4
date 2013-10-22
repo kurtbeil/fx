@@ -5,15 +5,31 @@
 //+------------------------------------------------------------------+
 
 
-int init(){
+#include <utility.mqh>
+#include <common.mqh>
+#include <CppUtility.mqh>
 
-  return (-1);  
+int init() {
+	OnInitBegin(WindowExpertName());
+	
+	double p1 = Ask-Point*50;
+	double p2 = Bid+Point*50;
+	
+	CppCreateLimitOrder(Symbol(),OP_BUY,p1,0.1,TimeCurrent()+5*60);	
+	CppCreateLimitOrder(Symbol(),OP_SELL,p2,0.1,TimeCurrent()+5*60);		
+	
+	return(0);
+}
+
+int deinit(){	
+	OnDeinitEnd();
 }
 
 void start()
 {
-	Print("hellol ");
-    ObjectCreate("text_object", OBJ_TEXT, 0, Time[0], Ask);
+	OnStartBegin();
+    // ...
+	OnStartEnd();	
 }  
 
 

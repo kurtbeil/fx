@@ -18,7 +18,7 @@ int deinit(){
 int start() {	
 	OnStartBegin();
 	Print("-------------test.start() begin-----------------");
-	CppCreateLimitOrder(Symbol(),OP_SELL,Bid,0.1,GetDefaulSlipPoints(Symbol()),TimeCurrent());
+	CppCreateLimitOrder(Symbol(),OP_SELL,1.6,0.1,TimeCurrent());	
 	Print("-------------test.start() end-------------------");
-	OnStartEnd();	
+	OnStartEnd();		
 }

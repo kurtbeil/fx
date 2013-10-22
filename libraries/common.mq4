@@ -38,7 +38,9 @@ void GenerateExecuteId() {
 	// 所有最终的解决方法,使用MQL4是的Object相关函数,这样的解决方法并不干净,其他EA和Indicator可能会对此造成干扰,在界面上
 	// 也存在删除这个对象的可能，但没有办法这是目前知道的唯一解决办法。
 	ObjectCreate("ExecuteId", OBJ_LABEL, 0, 0, 0);
-	ObjectSetText("ExecuteId",DoubleToStr(ExecuteId,0) , 16, "Times New Roman", Red);
+	ObjectSetText("ExecuteId",DoubleToStr(ExecuteId,0) , 10, "Times New Roman", Red);
+	ObjectSet("ExecuteId", OBJPROP_YDISTANCE, 15);
+	ObjectSet("ExecuteId", OBJPROP_XDISTANCE, 5);
 }
 
 string GetMainExpertName() {
@@ -49,20 +51,18 @@ string GetMainExpertName() {
 void ProcessLimitOrder() {
 	int count = CppGetLimitOrderCount() ;
 	for(int i = 0; i < count; i++) {
-		int ticket = CreatePositionAtPrice(
-		                 CppGetLimitOrderSymbol(), //
-		                 CppGetLimitOrderType(),
-		                 CppGetLimitOrderPrice(),
-		                 CppGetLimitOrderLots(),
-		                 CppGetLimitOrderSlip()
-		             );
-		if ( ticket > 0  || TimeCurrent() > CppGetLimitOrderExpdate()){
+		int ticket = 0;
+		if ( (Ask <= CppGetLimitOrderPrice() && CppGetLimitOrderType() == OP_BUY ) ||
+		        (Bid >= CppGetLimitOrderPrice() && CppGetLimitOrderType() == OP_SELL )) {
+			ticket = CreatePosition(CppGetLimitOrderSymbol(),CppGetLimitOrderType(),CppGetLimitOrderLots());
+		}
+		if ( ticket > 0  || TimeCurrent() > CppGetLimitOrderExpdate()) {
 			// 创建成功或者已经超时
-			CppRemoveLimitOrder();					   
-		}else{
+			CppRemoveLimitOrder();
+		} else {
 			// 创建失败将当前订单放至队尾，待下次重试
 			CppTurnLimitOrder();
-		}		
+		}
 	}
 }
 
@@ -96,5 +96,11 @@ void OnDeinitBegin() {
 }
 
 void OnDeinitEnd() {
+	// 删除所有挂单
+	int count = CppGetLimitOrderCount() ;
+	for(int i = 0; i < count; i++) {
+		CppRemoveLimitOrder();
+	}		
+	//  删除调用标识
 	ObjectDelete("ExecuteId");
 }

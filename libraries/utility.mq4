@@ -50,7 +50,7 @@ double GetSlipPoints() {
 	//return (0);
 }
 
-double GetDefaulSlipPoints(string symbol) {
+double GetSymbolSlipPoints(string symbol) {
 	double slip = StandardPointSize()*3/Point;
 	if ( symbol == "EURCAD" ) {
 		slip = StandardPointSize()*2/Point;
@@ -82,18 +82,6 @@ int CreatePosition(string symbol,int cmd,double lots) {
 	}
 	if (cmd==OP_SELL) {
 		ticket = OrderSend(symbol,OP_SELL,lots,Bid,GetSlipPoints(),0,0,"",magic,0,Red);
-	}
-	return (ticket);
-}
-
-int CreatePositionAtPrice(string symbol,int cmd,double price,double lots,double slip) {
-	int magic = GetExecuteId();
-	int ticket;
-	if (cmd==OP_BUY) {
-		ticket = OrderSend(symbol,OP_BUY,lots,price,slip,0,0,"",magic,0,Blue);
-	}
-	if (cmd==OP_SELL) {
-		ticket = OrderSend(symbol,OP_SELL,lots,price,slip,0,0,"",magic,0,Red);
 	}
 	return (ticket);
 }

@@ -11,11 +11,8 @@ bool IsFirstTick();
 
 // 交易相关
 int CreatePosition(string symbol,int cmd,double lots);
-int CreatePositionAtPrice(string symbol,int cmd,double price,double lots,double slip) ;
 void ClosePosition(int ticket);
 int PositionCount(string symbol,int cmd);
-double GetDefaulSlipPoints(string symbol) ;
-
 double StandardPointSize();
 
 

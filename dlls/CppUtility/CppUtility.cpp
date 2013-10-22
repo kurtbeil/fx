@@ -100,35 +100,38 @@ MT4_EXPFUNC char* __stdcall GlobalStringGet(int ExecuteId,char * name){
 
 
 struct LimitOrder{
+	int id;
 	string symbol;
 	int type;
 	double price;
 	double lots;
-	double slip;
 	int expdate;
 };
+
+int LimitOrderIdSeq = 1;
 
 // 存储限价单
 map<int,queue<LimitOrder> > LimitOrderQueen;
 
 
-MT4_EXPFUNC void CreateLimitOrder(int ExecuteId,char * symbol,int type,double price,double lots,double slip,int expdate){
+MT4_EXPFUNC int CreateLimitOrder(int ExecuteId,char * symbol,int type,double price,double lots,int expdate){
 	::EnterCriticalSection(&_LimitOrderQueen);   // 锁定变量LimitOrderQueen
-    try{
+    LimitOrder order;
+	try{
 		if ( LimitOrderQueen.count(ExecuteId) <= 0){
 			queue<LimitOrder> queue;	
 			LimitOrderQueen[ExecuteId] = queue;	       //   注意这里是拷贝
-		}
-		LimitOrder order;
+		}		
+		order.id = LimitOrderIdSeq++;
 		order.symbol = symbol;
 		order.type = type;
 		order.price = price;
-		order.lots = lots;		
-		order.slip = slip;
+		order.lots = lots;
 		order.expdate = expdate;
 		LimitOrderQueen[ExecuteId].push(order);        //   注意这里是变量拷贝
 	}catch(...){}
 	::LeaveCriticalSection(&_LimitOrderQueen); // 释放变量LimitOrderQueen 
+	return(order.id);
 }
 
 MT4_EXPFUNC int GetLimitOrderCount(int ExecuteId){
@@ -140,6 +143,24 @@ MT4_EXPFUNC int GetLimitOrderCount(int ExecuteId){
 		}else{
 			result = 0;
 		}	
+	}catch(...){}
+	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
+	return(result);
+}
+
+MT4_EXPFUNC int GetLimitOrderId(int ExecuteId){
+	int result;
+	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
+	try{	
+		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
+			if(LimitOrderQueen[ExecuteId].size() > 0){
+				result = LimitOrderQueen[ExecuteId].front().id;
+			}else{
+				result = -1;
+			}
+		}else{
+			result = -1;
+		}
 	}catch(...){}
 	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
 	return(result);
@@ -218,24 +239,6 @@ MT4_EXPFUNC double GetLimitOrderLots(int ExecuteId){
 	return(result);
 }
 
-
-MT4_EXPFUNC double GetLimitOrderSlip(int ExecuteId){
-	double result;
-	::EnterCriticalSection(&_LimitOrderQueen);  // 锁定变量LimitOrderQueen
-	try{	
-		if ( LimitOrderQueen.count(ExecuteId) > 0){ 
-			if(LimitOrderQueen[ExecuteId].size() > 0 ){
-				result = LimitOrderQueen[ExecuteId].front().slip;
-			}else{
-				result = -1;
-			}
-		}else{
-			result = -1;
-		}
-	}catch(...){}
-	::LeaveCriticalSection(&_LimitOrderQueen);  // 释放变量LimitOrderQueen 
-	return(result);
-}
 
 
 MT4_EXPFUNC int GetLimitOrderExpdate(int ExecuteId){
