@@ -99,4 +99,16 @@ void CppTurnLimitOrder() {
 
 
 
+int CppGetLimitOrderCountBy(string symbol,int  cmd) {
+	int count = 0;
+	int ordercnt = CppGetLimitOrderCount();	
+	for(int i = 0; i < ordercnt; i++) {
+		if (CppGetLimitOrderSymbol() ==  symbol && CppGetLimitOrderType() == cmd ){
+			count++;
+		}
+		CppTurnLimitOrder();
+	}		
+	return (count);
+}
+
 

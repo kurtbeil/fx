@@ -18,3 +18,4 @@ double CppGetLimitOrderLots();
 int CppGetLimitOrderExpdate();
 void CppRemoveLimitOrder();
 void CppTurnLimitOrder();
+int CppGetLimitOrderCountBy(string symbol,int  cmd) ;

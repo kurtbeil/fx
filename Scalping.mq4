@@ -69,25 +69,6 @@ double rsi_period = 7;
 int max_long_position = 5;
 int max_short_position = 5;
 
-int init() {
-   OnInitBegin();	
-    magic = GetExecuteId();
-	long_tp_size = StandardPointSize() * 2;
-	long_sl_size =  StandardPointSize() *  12;
-	short_tp_size = StandardPointSize() * 2;
-	short_sl_size = StandardPointSize() * 12;
-
-	string exportfile = "closelog.csv";
-
-	FileDelete(exportfile);
-	int handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,",");
-	if(handle>0) {
-		FileSeek(handle, 0, SEEK_END);
-		FileWrite(handle,"time,opentime,closetime,openprice,closeprice");
-		FileClose(handle );
-	}
-	
-}
 
 void closelog(string msg) {
 	int handle;
@@ -217,6 +198,26 @@ double getLots(){
 }
 */
 
+int init() {
+   OnInitBegin(WindowExpertName());	
+    magic = GetExecuteId();
+	long_tp_size = StandardPointSize() * 2;
+	long_sl_size =  StandardPointSize() *  12;
+	short_tp_size = StandardPointSize() * 2;
+	short_sl_size = StandardPointSize() * 12;
+
+	string exportfile = "closelog.csv";
+
+	FileDelete(exportfile);
+	int handle=FileOpen(exportfile,FILE_READ|FILE_WRITE|FILE_CSV ,",");
+	if(handle>0) {
+		FileSeek(handle, 0, SEEK_END);
+		FileWrite(handle,"time,opentime,closetime,openprice,closeprice");
+		FileClose(handle );
+	}
+	
+}
+
 
 int start() {
 	if (IsFirstTick()) {
@@ -227,8 +228,10 @@ int start() {
 		//	Print("here here !");
 		//}
 	}
-
 }
 
+int deinit(){	
+	OnDeinitEnd();
+}
 
 
