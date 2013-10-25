@@ -169,5 +169,43 @@ string GetOrderTypeName(int ordertype) {
 }
 
 
+int GetPositionColor(int ordertype) {
+	int pcolor=Blue;
+	if (ordertype==OP_BUY) {
+		pcolor = Blue;
+	}
+	if (ordertype==OP_SELL) {
+		pcolor = Red;
+	}
+	return(pcolor);
+}
+
+void CreateOpenArrow(string objectname,int ordertype,datetime  time,double price) {
+	ObjectCreate(objectname, OBJ_ARROW, 0, time, price);
+	ObjectSet(objectname, OBJPROP_ARROWCODE, 1);
+	ObjectSet(objectname, OBJPROP_COLOR, GetPositionColor(ordertype));
+}
+
+void CreateCloseArrow(string objectname,int ordertype,datetime  time,double price) {
+	ObjectCreate(objectname, OBJ_ARROW, 0, time, price);
+	ObjectSet(objectname, OBJPROP_ARROWCODE, 3);
+	ObjectSet(objectname, OBJPROP_COLOR, GetPositionColor(ordertype));
+}
+
+void CreatePositionLine(string objectname,int ordertype,datetime  t1,double p1,datetime  t2,double p2) {
+	ObjectCreate(objectname, OBJ_TREND, 0,  t1, p1,t2, p2);
+	ObjectSet(objectname, OBJPROP_STYLE, STYLE_DOT);
+	ObjectSet(objectname, OBJPROP_RAY, False);
+	ObjectSet(objectname, OBJPROP_COLOR, GetPositionColor(ordertype));
+}
+
+void DrawPosition(int orderticket,string symbol,double lots,int ordertype,datetime  t1,double p1,datetime  t2,double p2) {
+	string openarrow = "#"+orderticket+" " + GetOrderTypeName(ordertype) + " " + lots+  " "+symbol+" at " + p1;
+	string closearrow = "#" + orderticket + " " +  GetOrderTypeName(ordertype)+" " + lots+ " "+symbol+" at "+p1+" close at "+p2;
+	string line = "#" + orderticket +" " + p1+  " -> " + p2;
+    CreateOpenArrow(openarrow,ordertype,t1,p1);
+	CreateOpenArrow(closearrow,ordertype,t2,p2);
+	CreatePositionLine(line,ordertype,t1,p1,t2,p2);
+}
 
 
