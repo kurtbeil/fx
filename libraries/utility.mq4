@@ -199,13 +199,13 @@ void CreatePositionLine(string objectname,int ordertype,datetime  t1,double p1,d
 	ObjectSet(objectname, OBJPROP_COLOR, GetPositionColor(ordertype));
 }
 
-void DrawPosition(int orderticket,string symbol,double lots,int ordertype,datetime  t1,double p1,datetime  t2,double p2) {
-	string openarrow = "#"+orderticket+" " + GetOrderTypeName(ordertype) + " " + lots+  " "+symbol+" at " + p1;
-	string closearrow = "#" + orderticket + " " +  GetOrderTypeName(ordertype)+" " + lots+ " "+symbol+" at "+p1+" close at "+p2;
-	string line = "#" + orderticket +" " + p1+  " -> " + p2;
-    CreateOpenArrow(openarrow,ordertype,t1,p1);
-	CreateOpenArrow(closearrow,ordertype,t2,p2);
-	CreatePositionLine(line,ordertype,t1,p1,t2,p2);
+void DrawPosition(int orderticket,string symbol,int ordertype,double lots,datetime  t1,double p1,datetime  t2,double p2) {
+	string openarrow = "#"+orderticket+" " + GetOrderTypeName(ordertype) + " " + DoubleToStr(lots,2)+  " "+symbol+" at " + DoubleToStr(p1,5);
+	string closearrow = "#" + orderticket + " " +  GetOrderTypeName(ordertype)+" " + DoubleToStr(lots,2)+ " "+symbol+" at "+p1+" close at "+DoubleToStr(p2,5);
+	string line = "#" + orderticket +" " + DoubleToStr(p1,5)+  " -> " + DoubleToStr(p2,5);
+	CreateOpenArrow(openarrow,ordertype,t1,p1);
+	CreateCloseArrow(closearrow,ordertype,t2,p2);
+	CreatePositionLine(line,ordertype,t1,p1,t2,p2);	
 }
 
 

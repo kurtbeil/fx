@@ -34,7 +34,7 @@ int GetPositionColor(int ordertype);
 void CreateOpenArrow(string objectname,int ordertype,datetime  time,double price);
 void CreateCloseArrow(string objectname,int ordertype,datetime  time,double price);
 void CreatePositionLine(string objectname,int ordertype,datetime  t1,double p1,datetime  t2,double p2) ;
-void DrawPosition(int orderticket,string symbol,double lots,int ordertype,datetime  t1,double p1,datetime  t2,double p2) ;
+void DrawPosition(int orderticket,string symbol,int ordertype,double lots,datetime  t1,double p1,datetime  t2,double p2) ;
 
 
 
