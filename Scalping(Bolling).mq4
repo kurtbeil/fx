@@ -32,10 +32,9 @@ int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
 	long_tp_size = StandardPointSize() * 2.5;
-	long_sl_size =  StandardPointSize() *  13;
+	long_sl_size =  StandardPointSize() *  12;
 	short_tp_size = StandardPointSize() * 2.5;
-	short_sl_size = StandardPointSize() * 13;
-
+	short_sl_size = StandardPointSize() * 12;
 }
 
 
@@ -72,7 +71,7 @@ void checkForOpen() {
 	// 计算当前的时间段
 	//int hh24 = TimeHour(TimeCurrent());
 
-	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 15) {
+	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 10) {
 		if ( isLongTradingHour() ) {
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				if ( Low[1] < bands_low ) {
