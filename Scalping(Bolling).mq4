@@ -72,7 +72,7 @@ void checkForOpen() {
 	// 计算当前的时间段
 	//int hh24 = TimeHour(TimeCurrent());
 
-	if ((bands_high-bands_low) * 10000 > 5.5 && (bands_high-bands_low) * 10000 < 15) {
+	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 15) {
 		if ( isLongTradingHour() ) {
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				if ( Low[1] < bands_low ) {
@@ -122,8 +122,8 @@ void checkForClose() {
 				continue;
 			}
 			// 检查布林带的关闭条件是否产生
-			if ( High[0] > bands_high ) {
-				PutTicketCloseQueue(OrderTicket());  
+			if ( High[1] > bands_high ) {
+				//PutTicketCloseQueue(OrderTicket());  
 				continue;
 			}
 		}
@@ -137,8 +137,8 @@ void checkForClose() {
 				continue;
 			}
 			// 检查布林带的关闭条件是否产生
-			if (  Low[0] < bands_low ) {
-				PutTicketCloseQueue(OrderTicket());  
+			if (  Low[1] < bands_low ) {
+				//PutTicketCloseQueue(OrderTicket());  
 				continue;
 			}
 		}
@@ -183,14 +183,10 @@ double getLots(){
 
 int start() {
 	OnStartBegin();
-	if (IsFirstTick()) {
-		checkForOpen();
-		checkForClose();
-		//string timestamp = TimeToStr(TimeCurrent());
-		//if (timestamp == "2013.07.05 00:00" ) {
-		//	Print("here here !");
-		//}
-	}
+	//if (IsFirstTick()) {
+   checkForOpen();
+   checkForClose();
+	//}
 	OnStartEnd();
 }
 
