@@ -17,7 +17,7 @@
 int magic;
 
 // 获利范围设置
-double long_tp_size = 0;
+double long_tp_size = 0; 
 double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
