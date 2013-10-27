@@ -98,6 +98,9 @@ void checkForClose() {
 	int total;
 	int i;
 
+	double bands_high  = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_UPPER,1);
+	double  bands_low = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_LOWER,1);
+	
 	// 遍历所有已开头寸检查是否满足平仓的条件
 	total=OrdersTotal();
 	for(i=0; i<total; i++) {
@@ -112,17 +115,31 @@ void checkForClose() {
 		}				
 		double long_tp = 2*long_tp_size*(trading_length-minutes)/trading_length-long_tp_size;		
 		if(OrderType() == OP_BUY) {
+			//  检查是否达到盈利或止损条件
 			if ( Round(Bid-OrderOpenPrice(),5) > long_tp ||
 			        Round(OrderOpenPrice()-Bid,5) > long_sl_size  ) {
-				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
+				PutTicketCloseQueue(OrderTicket());  
+				continue;
+			}
+			// 检查布林带的关闭条件是否产生
+			if ( High[0] > bands_high ) {
+				PutTicketCloseQueue(OrderTicket());  
+				continue;
 			}
 		}
 		// 尝试关闭空头头寸
 		double short_tp = 2*short_tp_size*(trading_length-minutes)/trading_length-short_tp_size;		
 		if(OrderType() == OP_SELL) {
+			//  检查是否达到盈利或止损条件
 			if ( Round(OrderOpenPrice() - Ask,5) > short_tp ||
 			        Round(Ask - OrderOpenPrice(),5) > short_sl_size ) {
-				PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
+				PutTicketCloseQueue(OrderTicket());  
+				continue;
+			}
+			// 检查布林带的关闭条件是否产生
+			if (  Low[0] < bands_low ) {
+				PutTicketCloseQueue(OrderTicket());  
+				continue;
 			}
 		}
 	}
