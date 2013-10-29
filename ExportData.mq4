@@ -19,12 +19,13 @@ int init() {
 int start() {
 	if(IsFirstTick()) {
 		static int n=0;
+		string timestamp = TimeToStr(TimeCurrent());
 		double rsi = iRSI(Symbol(),Period(),7,PRICE_CLOSE,0);
 		double rsi1 = iRSI(Symbol(),Period(),7,PRICE_CLOSE,1);
 		double pts = (Ask-Bid) * 10000;
 		WriteData(
 		    "export",
-		    Time[1]+"," +Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid + "," + rsi + "," + rsi1 + "," +pts + "," + n
+		    timestamp+"," +Open[1]+ "," +Close[1] + "," + High[1] + "," + Low[1]+ "," + Volume[1] + "," + Ask + "," + Bid + "," + rsi + "," + rsi1 + "," +pts + "," + n
 		);
 		n++;
 	}
