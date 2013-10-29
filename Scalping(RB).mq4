@@ -17,7 +17,7 @@
 int magic;
 
 // 获利范围设置
-double long_tp_size = 0; 
+double long_tp_size = 0;
 double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
@@ -99,51 +99,51 @@ void checkForClose() {
 
 	double bands_high  = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_UPPER,1);
 	double  bands_low = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_LOWER,1);
-	
+
 	// 遍历所有已开头寸检查是否满足平仓的条件
 	total=OrdersTotal();
 	for(i=0; i<total; i++) {
 		if( OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false ) continue;
 		if( OrderMagicNumber()!=magic ) continue;
 		if( OrderSymbol()!=Symbol() ) continue;
-		// 尝试关闭多头头寸		
+		// 尝试关闭多头头寸
 		int minutes =  MinutesBetween(TimeCurrent(),OrderOpenTime());
 		if (minutes >= trading_length) {
-			PutTicketCloseQueue(OrderTicket()); 
+			PutTicketCloseQueue(OrderTicket());
 			continue;
-		}				
-		double long_tp = 2*long_tp_size*(trading_length-minutes)/trading_length-long_tp_size;		
+		}
+		double long_tp = 2*long_tp_size*(trading_length-minutes)/trading_length-long_tp_size;
 		if(OrderType() == OP_BUY) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(Bid-OrderOpenPrice(),5) > long_tp ||
 			        Round(OrderOpenPrice()-Bid,5) > long_sl_size  ) {
-				PutTicketCloseQueue(OrderTicket());  
+				PutTicketCloseQueue(OrderTicket());
 				continue;
 			}
 			// 检查布林带的关闭条件是否产生
 			if ( High[1] > bands_high ) {
-				//PutTicketCloseQueue(OrderTicket());  
+				//PutTicketCloseQueue(OrderTicket());
 				continue;
 			}
 		}
 		// 尝试关闭空头头寸
-		double short_tp = 2*short_tp_size*(trading_length-minutes)/trading_length-short_tp_size;		
+		double short_tp = 2*short_tp_size*(trading_length-minutes)/trading_length-short_tp_size;
 		if(OrderType() == OP_SELL) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(OrderOpenPrice() - Ask,5) > short_tp ||
 			        Round(Ask - OrderOpenPrice(),5) > short_sl_size ) {
-				PutTicketCloseQueue(OrderTicket());  
+				PutTicketCloseQueue(OrderTicket());
 				continue;
 			}
 			// 检查布林带的关闭条件是否产生
 			if (  Low[1] < bands_low ) {
-				//PutTicketCloseQueue(OrderTicket());  
+				//PutTicketCloseQueue(OrderTicket());
 				continue;
 			}
 		}
 	}
 	// 将队列中的头寸全部关闭
-	ClearTicketCloseQueue();  
+	ClearTicketCloseQueue();
 
 	// 时间进入周五的23:30以后,市场即将关闭,马上关闭所有头寸
 	if ( DayOfWeek()== 5  &&  Hour() == 23 &&  Minute() > 30 ) {
@@ -155,10 +155,10 @@ void checkForClose() {
 			PutTicketCloseQueue(OrderTicket());  // 将ticket放入待关闭队列
 		}
 	}
-	
-	
+
+
 	// 将队列中的头寸全部关闭
-	ClearTicketCloseQueue();  
+	ClearTicketCloseQueue();
 }
 
 
@@ -182,10 +182,13 @@ double getLots(){
 
 int start() {
 	OnStartBegin();
-	//if (IsFirstTick()) {
-   checkForOpen();
-   checkForClose();
-	//}
+	if (IsFirstTick()) {
+		//checkForOpen();
+		//checkForClose();
+		double rsi = iCustom(Symbol(),Period(),"RSIMA",100,7,0,1);  // 取rsi
+		double rsima = iCustom(Symbol(),Period(),"RSIMA",100,7,1,1);  // 取rsima
+		Print("hello rsi[1]=",rsi,"rsima[1]=",rsima);
+	}
 	OnStartEnd();
 }
 

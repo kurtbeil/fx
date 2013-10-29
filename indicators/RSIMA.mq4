@@ -7,8 +7,8 @@
 
 
 
-int rsiPeriod = 7;
-int maPeriod = 7;
+extern int rsiPeriod = 7;
+extern int maPeriod = 7;
 
 double Rsi[];
 double RsiMa[];
@@ -33,7 +33,7 @@ int start() {
 	int limit=Bars-counted_bars;
 	int i;
 	for(i=0; i<limit; i++) {
-		Rsi[i] = iRSI(Symbol(),Period(),14,PRICE_CLOSE,i);
+		Rsi[i] = iRSI(Symbol(),Period(),rsiPeriod,PRICE_CLOSE,i);
 	}
 	for(i=0; i<limit; i++) {
 		RsiMa[i] = iMAOnArray(Rsi,0,maPeriod,0,MODE_SMA,i);
