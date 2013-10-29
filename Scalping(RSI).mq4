@@ -111,6 +111,7 @@ bool isShortTradingHour() {
 void checkForOpen() {
 
     if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
+	if ( Year() == 2013 && Month() == 8 && Day() == 20 ) return;  // 避开20138020的特殊情况
 	// 计算对应的rsi0值
 	double rsi0 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,0);
 	double rsi1 = iRSI(Symbol(),Period(),rsi_period,PRICE_CLOSE,1);

@@ -31,7 +31,7 @@ double trading_length = 120;
 int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
-	long_tp_size = StandardPointSize() * 2.5;
+	long_tp_size = StandardPointSize() *  2.5;
 	long_sl_size =  StandardPointSize() *  12;
 	short_tp_size = StandardPointSize() * 2.5;
 	short_sl_size = StandardPointSize() * 12;
@@ -64,19 +64,33 @@ void checkForOpen() {
 
 	if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
 	if ( DayOfWeek()== 1 ) return;  // 周一凌晨不交易
+	if ( Year() == 2013 && Month() == 8 && Day() == 20 ) return;  // 避开20138020的特殊情况
 
 	// 计算对应的布林带的值
 	double bands_high  = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_UPPER,1);
 	double  bands_low = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_LOWER,1);
+	
+	// 计算RSIMA
+	double rsima  = iCustom(
+	                    Symbol(),
+	                    Period(),
+	                    "RSIMA",
+	                    14,                 // RSI的周期
+	                    7,                  // 在RSI上附加的移动平均线的周期
+	                    1,                  // 第2各指标值(可选范围0..7)
+	                    1                   // 时间下标(shift)
+	                );
+
 	// 计算当前的时间段
 	//int hh24 = TimeHour(TimeCurrent());
 
-	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 10) {
+	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 10 ) {
 		if ( isLongTradingHour() ) {
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				if ( Low[1] < bands_low ) {
 					// open a buy opsition
 					//CreatePosition(Symbol(),OP_BUY,getLots());
+					if ( rsima < 60 )
 					CppCreateLimitOrder(Symbol(),OP_BUY,Ask-0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
@@ -86,6 +100,7 @@ void checkForOpen() {
 				if ( High[1] > bands_high ) {
 					// open a sell opsition
 					//CreatePosition(Symbol(),OP_SELL,getLots());
+					if( rsima > 40)
 					CppCreateLimitOrder(Symbol(),OP_SELL,Bid+0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
@@ -182,13 +197,11 @@ double getLots(){
 
 int start() {
 	OnStartBegin();
-	if (IsFirstTick()) {
-		//checkForOpen();
-		//checkForClose();
-		double rsi = iCustom(Symbol(),Period(),"RSIMA",100,7,0,1);  // 取rsi
-		double rsima = iCustom(Symbol(),Period(),"RSIMA",100,7,1,1);  // 取rsima
-		Print("hello rsi[1]=",rsi,"rsima[1]=",rsima);
-	}
+	//if (IsFirstTick()) {
+	checkForOpen();
+	checkForClose();
+
+	//}
 	OnStartEnd();
 }
 
