@@ -11,13 +11,14 @@ mqlcache.dat
 /scripts/lparams.txt
 /dlls/*/*/*.pdb
 /dlls/*/*/*.obj
-/dlls/*/*.plg
-/dlls/*/*.ncb
-/dlls/*/*/*.opt
 /dlls/*/*/*.idb
 /dlls/*/*/*.exp
 /dlls/*/*/*.ilk
 /dlls/*/*/*.lib
+/dlls/*/*/*.dll
+/dlls/*/*.plg
+/dlls/*/*.opt
+/dlls/*/*.ncb
 
 
 
