@@ -16,6 +16,7 @@ mqlcache.dat
 /dlls/*/*/*.ilk
 /dlls/*/*/*.lib
 /dlls/*/*/*.dll
+/dlls/*/*/*.pch
 /dlls/*/*.plg
 /dlls/*/*.opt
 /dlls/*/*.ncb

@@ -50,7 +50,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-MT4_EXPFUNC int __stdcall GetIntValue(const int ipar)
+MT4_EXPFUNC  int __stdcall GetIntValue(const int ipar)
   {
    printf("GetIntValue takes %d\n",ipar);
    return(ipar);
