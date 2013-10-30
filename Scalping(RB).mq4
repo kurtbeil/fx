@@ -6,12 +6,7 @@
 
 
 /*
- 使用布林带实现把头皮战术
- (1)  实现近距离限价单的能力
- (2)  使用分段函数结束头寸
- (3)  是否引入信号关闭机制
- (4)  不要再周一凌晨进行交易
-
+使用了在布林带的基础上引入了阶梯式的止赢，效果明显提升
 */
 
 int magic;
@@ -26,14 +21,14 @@ int max_long_position = 1;
 int max_short_position = 1;
 
 // 交易最长时间范围设定
-double trading_length = 120;
+double trading_length = 200;
 
 int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
-	long_tp_size = StandardPointSize() *  2.5;
+	long_tp_size = StandardPointSize() *  3;
 	long_sl_size =  StandardPointSize() *  12;
-	short_tp_size = StandardPointSize() * 2.5;
+	short_tp_size = StandardPointSize() * 3;
 	short_sl_size = StandardPointSize() * 12;
 }
 
@@ -69,7 +64,7 @@ void checkForOpen() {
 	// 计算对应的布林带的值
 	double bands_high  = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_UPPER,1);
 	double  bands_low = iBands(Symbol(),Period(),20,2,0,PRICE_CLOSE,MODE_LOWER,1);
-	
+
 	// 计算RSIMA
 	double rsima  = iCustom(
 	                    Symbol(),
@@ -81,16 +76,11 @@ void checkForOpen() {
 	                    1                   // 时间下标(shift)
 	                );
 
-	// 计算当前的时间段
-	//int hh24 = TimeHour(TimeCurrent());
-
-	if ((bands_high-bands_low) * 10000 > 5 && (bands_high-bands_low) * 10000 < 10 ) {
+	if ((bands_high-bands_low) * 10000 >= 4 && (bands_high-bands_low) * 10000 <= 8 ) {
 		if ( isLongTradingHour() ) {
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				if ( Low[1] < bands_low ) {
-					// open a buy opsition
-					//CreatePosition(Symbol(),OP_BUY,getLots());
-					if ( rsima < 60 )
+					Print("Try to open a buy position");
 					CppCreateLimitOrder(Symbol(),OP_BUY,Ask-0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
@@ -98,15 +88,28 @@ void checkForOpen() {
 		if ( isShortTradingHour() ) {
 			if (PositionCount(Symbol(),OP_SELL)  + CppGetLimitOrderCountBy(Symbol(),OP_SELL)  + 1 <= max_short_position) {
 				if ( High[1] > bands_high ) {
-					// open a sell opsition
-					//CreatePosition(Symbol(),OP_SELL,getLots());
-					if( rsima > 40)
+					Print("Try to open a sell position");
 					CppCreateLimitOrder(Symbol(),OP_SELL,Bid+0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
 		}
 	}
 }
+
+
+double getLongTP(int minutes) {
+	int n = minutes/30;
+	double ret =  long_tp_size - n*StandardPointSize();
+	return (ret);
+}
+
+double getShortTP(int minutes) {
+	int n = minutes/30;
+	double ret = short_tp_size - n*StandardPointSize();
+	return(ret);
+}
+
+
 
 void checkForClose() {
 	int total;
@@ -127,7 +130,8 @@ void checkForClose() {
 			PutTicketCloseQueue(OrderTicket());
 			continue;
 		}
-		double long_tp = 2*long_tp_size*(trading_length-minutes)/trading_length-long_tp_size;
+		//double long_tp = 2*long_tp_size*(trading_length-minutes)/trading_length-long_tp_size;
+		double long_tp = getLongTP(minutes);
 		if(OrderType() == OP_BUY) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(Bid-OrderOpenPrice(),5) > long_tp ||
@@ -142,7 +146,8 @@ void checkForClose() {
 			}
 		}
 		// 尝试关闭空头头寸
-		double short_tp = 2*short_tp_size*(trading_length-minutes)/trading_length-short_tp_size;
+		//double short_tp = 2*short_tp_size*(trading_length-minutes)/trading_length-short_tp_size;
+		double short_tp = getShortTP(minutes);
 		if(OrderType() == OP_SELL) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(OrderOpenPrice() - Ask,5) > short_tp ||
