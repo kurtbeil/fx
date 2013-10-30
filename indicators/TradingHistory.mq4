@@ -194,14 +194,14 @@ void printOpenHistory(){
 //+------------------------------------------------------------------+
 int init()
 {
-   // »ñÈ¡µ±Ç°Æ·ÖÖµÄ½»Ò×¼ÇÂ¼ÊıÁ¿
+   // è·å–å½“å‰å“ç§çš„äº¤æ˜“è®°å½•æ•°é‡
    orderTotal = getOrderTotal();
-   // ³õÊ¼»¯Êı¾İ
+   // åˆå§‹åŒ–æ•°æ®
    initOrderInfoBuf();
    readTradingHistory();
    sortTradingHistory();
    
-   // ³õÊ¼»¯Ö¸±êµÄÊôĞÔ
+   // åˆå§‹åŒ–æŒ‡æ ‡çš„å±æ€§
    IndicatorBuffers(4);          
    //-----------------------------
    SetIndexStyle(0,DRAW_ARROW,0,0.5);
