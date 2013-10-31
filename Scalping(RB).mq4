@@ -6,6 +6,7 @@
 
 
 /*
+
 1、使用了在布林带的基础上引入了阶梯式的止赢，效果明显提升 (ok)
 2、头寸重入时要考虑，前一个同方向头寸的盈利情况，如果亏损那就只能在比之前头寸更有利的情况下才买进
 
@@ -206,13 +207,17 @@ double getLots(){
 
 
 int start() {
+	//Print("-----0-----");
 	OnStartBegin();
 	//if (IsFirstTick()) {
+	//Print("-----1-----");
 	checkForOpen();
+	//Print("-----2-----");
 	checkForClose();
-
+	//Print("-----3-----");
 	//}
 	OnStartEnd();
+	//Print("-----4-----");
 }
 
 

@@ -101,8 +101,9 @@ void ClosePosition(int ticket) {
 			ret = OrderClose(OrderTicket(),OrderLots(),Ask,GetSlipPoints(),Red);
 		}
 		if (!ret) {
+			//Print("close fail will retry");
 			Sleep(10000);
-			RefreshRates();
+			RefreshRates();			
 		} else {
 			return;
 		}
