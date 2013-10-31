@@ -6,7 +6,11 @@
 
 
 /*
-使用了在布林带的基础上引入了阶梯式的止赢，效果明显提升
+1、使用了在布林带的基础上引入了阶梯式的止赢，效果明显提升 (ok)
+2、头寸重入时要考虑，前一个同方向头寸的盈利情况，如果亏损那就只能在比之前头寸更有利的情况下才买进
+
+
+
 */
 
 int magic;
@@ -17,19 +21,19 @@ double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
 
-int max_long_position = 1;
-int max_short_position = 1;
+int max_long_position = 2;
+int max_short_position = 2;
 
 // 交易最长时间范围设定
-double trading_length = 200;
+double trading_length = 300;
 
 int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
-	long_tp_size = StandardPointSize() *  3;
-	long_sl_size =  StandardPointSize() *  12;
-	short_tp_size = StandardPointSize() * 3;
-	short_sl_size = StandardPointSize() * 12;
+	long_tp_size = StandardPointSize() *  2;
+	long_sl_size =  StandardPointSize() *  18;
+	short_tp_size = StandardPointSize() * 2;
+	short_sl_size = StandardPointSize() * 18;
 }
 
 
@@ -42,6 +46,7 @@ bool isLongTradingHour() {
 	} else {
 		return (false);
 	}
+	return(false);
 }
 
 // 空头交易的时间范围
@@ -80,16 +85,16 @@ void checkForOpen() {
 		if ( isLongTradingHour() ) {
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				if ( Low[1] < bands_low ) {
-					Print("Try to open a buy position");
-					CppCreateLimitOrder(Symbol(),OP_BUY,Ask-0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
+					//Print("Try to open a buy position");
+					CppCreateLimitOrder(Symbol(),OP_BUY,Ask-1*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
 		}
 		if ( isShortTradingHour() ) {
 			if (PositionCount(Symbol(),OP_SELL)  + CppGetLimitOrderCountBy(Symbol(),OP_SELL)  + 1 <= max_short_position) {
 				if ( High[1] > bands_high ) {
-					Print("Try to open a sell position");
-					CppCreateLimitOrder(Symbol(),OP_SELL,Bid+0.5*StandardPointSize(),getLots(),TimeCurrent()+10*60);
+					//Print("Try to open a sell position");
+					CppCreateLimitOrder(Symbol(),OP_SELL,Bid+1*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 				}
 			}
 		}
