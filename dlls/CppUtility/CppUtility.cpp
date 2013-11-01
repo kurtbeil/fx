@@ -1,11 +1,9 @@
-// CUtility.cpp : Defines the entry point for the DLL application.
+// CppUtility.cpp : Defines the entry point for the DLL application.
 //
 
 #include "stdafx.h"
-#include "CUtility.h"
+#include "CppUtility.h"
 
-
-// Dll 入口定义
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
                        LPVOID lpReserved
@@ -23,15 +21,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 }
 
 
-
-
-int cnt = 0;
-
-CUTILITY_API int __stdcall inc(int i)
-{
-	cnt += i;
-	return cnt;
+MT4_EXPFUNC int __stdcall inc(int i) {
+	return(0);
 }
-
-
-

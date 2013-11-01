@@ -9,9 +9,9 @@
 #include <cutility.mqh>
 
 void start()
-{
-    int  i = 4294967295;
-    Print(i);
+{ 
+    Print("TerminalName:", TerminalName());
+    Print("AccountCompany:", AccountCompany());
 }  
 
 
