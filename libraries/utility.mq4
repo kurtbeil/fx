@@ -1,6 +1,10 @@
 #property library
 
 
+#include <common.mqh>
+
+
+/*
 void WriteLog(int magic,string msg) {
 	string timestamp = TimeToStr(TimeCurrent());
 	string filename = "[magic=" + magic + "[symbol=" + Symbol()+ "].log";
@@ -10,6 +14,29 @@ void WriteLog(int magic,string msg) {
 		FileWrite(handle,timestamp,":", msg);
 		FileClose(handle );
 	}
+}
+*/
+
+void WriteLog(string msg) {
+	string timestamp = TimeToStr(TimeCurrent());
+	string filename =  "(symbol=" + Symbol()+ ")(ExecuteId=" + GetExecuteId() + ").log";
+	int handle=FileOpen(filename,FILE_READ|FILE_WRITE," ");
+	if(handle>0) {
+		FileSeek(handle, 0, SEEK_END);
+		FileWrite(handle,timestamp,":", msg);
+		FileClose(handle );
+	}	
+}
+
+void WriteData(string dataname,string data) {
+	string timestamp = TimeToStr(TimeCurrent());
+	string filename =  "" + dataname+ "(symbol=" + Symbol()+ ")(ExecuteId=" + GetExecuteId() + ").csv";
+	int handle=FileOpen(filename,FILE_READ|FILE_WRITE," ");
+	if(handle>0) {
+		FileSeek(handle, 0, SEEK_END);
+		FileWrite(handle,data);
+		FileClose(handle );
+	}		
 }
 
 int PositionCount(string symbol,int cmd,int magic) {

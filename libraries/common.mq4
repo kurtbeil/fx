@@ -1,15 +1,11 @@
-
-
 #property library
 
 
 
-int ExecuteId = 0;
 
 int GetExecuteId() {
-	return(ExecuteId);
+	return(GlobalVariableGet("ExecuteId"));
 }
-
 
 int GenerateExecuteId() {
     // 目前暂用系统时间作为ExecuteId这存在重复的可能性
@@ -22,15 +18,15 @@ int GenerateExecuteId() {
 	ExecuteId  += Day()  * 1000000;
 	ExecuteId  += Hour() * 10000;
 	ExecuteId  += Minute() * 100;
-	ExecuteId  += Seconds() ;
+	ExecuteId  += Seconds() ;	
 	return(ExecuteId);
 }
 
 void OnInitBegin() {
 	//检查是否做交易测试
-	if(!IsTesting()) {
-		ExecuteId = GenerateExecuteId();
-	}
+	//if(!IsTesting()) {
+	GlobalVariableSet("ExecuteId",GenerateExecuteId());
+	//}
 }
 
 // 我们希望增加以下函数来为EA增加诸如导出数据的能力，但是如果是调用者是指标而不是EA要怎么处理?

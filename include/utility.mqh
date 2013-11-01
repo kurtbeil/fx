@@ -14,3 +14,6 @@ bool IsFirstTick();
 void PutTicketCloseQueue(int ticket);
 void ClearTicketCloseQueue();
 
+void WriteLog(string msg) ;
+void WriteData(string dataname,string data);
+
