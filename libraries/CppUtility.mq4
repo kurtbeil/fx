@@ -3,13 +3,20 @@
 #include <common.mqh>
 
 #import "CppUtility.dll"
-int c_inc(int i);
-int c_read(int i);
+string GlobalStringGet(int ExecuteId,string name);
+void GlobalStringSet(int ExecuteId,string name,string value);
+int GenerateExecuteId();
 
+string CppGlobalStringGet(string name){
+	return (GlobalStringGet(GetExecuteId(),name));	
+}
 
-int CppTest(int i){
-	c_inc(i);
-	GetExecuteId();
+void CppGlobalStringSet(string name,string value) {
+	GlobalStringSet(GetExecuteId(),name,value);
+}
+
+int CppGenerateExecuteId(){
+	return(GenerateExecuteId());
 }
 
 

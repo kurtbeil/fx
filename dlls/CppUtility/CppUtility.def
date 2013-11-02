@@ -1,2 +1,4 @@
 LIBRARY CppUtility
- EXPORTS inc
+ EXPORTS GlobalStringSet
+		 GlobalStringGet
+		 GenerateExecuteId

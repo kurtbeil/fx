@@ -2,4 +2,6 @@
 #import "common.ex4"
 
 int GetExecuteId();
-void OnInitBegin();
+string GetMainExpertName();
+void OnInitBegin(string MainExpertname);
+

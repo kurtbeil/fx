@@ -6,12 +6,11 @@
 
 
 
-#include <cutility.mqh>
+#include <CppUtility.mqh>
 
 void start()
 { 
-    Print("TerminalName:", TerminalName());
-    Print("AccountCompany:", AccountCompany());
+    Print("test");
 }  
 
 

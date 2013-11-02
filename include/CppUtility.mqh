@@ -1,4 +1,5 @@
-#import "CppUtility.dll"
+#import "CppUtility.ex4"
 
-int c_inc(int i);
-int c_read(int i);
+string CppGlobalStringGet(string name);
+string CppGlobalStringSet(string name,string value);
+int CppGenerateExecuteId();

@@ -6,13 +6,13 @@
 string GetFileStamp() {
 	string stamp =  "(" +
 	                "ExecuteId=" + GetExecuteId()  +
-	                ",Symbol=" + Symbol()+
-					",Period=" + Period()+
-					",Expert=" + WindowExpertName()+						
+	                ",Expert=" + GetMainExpertName()+
+					",Symbol=" + Symbol()+
+					",Period=" + Period()+											
 	                ",Account=" + AccountNumber()  +
 	                ",AccountServer=" + AccountServer() +					
-	                ",AccountName=" + AccountName()  +
-	                ",TerminalName=" + TerminalName() +
+	                // ",AccountName=" + AccountName()  +
+	                // ",TerminalName=" + TerminalName() +
 	                ")" ;
 	return (stamp);
 }

@@ -14,7 +14,17 @@
 // Insert your headers here
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
+#pragma warning(disable:4786)
+#pragma warning(disable:4503)
+
 #include <windows.h>
+#include <map>
+#include <string>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+using namespace std;
+
 
 // TODO: reference additional headers your program requires here
 
