@@ -54,10 +54,10 @@ MT4_EXPFUNC void __stdcall GlobalStringSet(int ExecuteId,char * name,char * valu
 	try{
 		// 对应的ExecuteId是否已经建立起全局变量集
 		if ( StringParameter.count(ExecuteId) <= 0){
-			map<string,string> * p  = new map<string,string>;	
-			StringParameter[ExecuteId] = *p;	//   这里这么写是对象拷贝还是引用，如果是引用这样没有任何问题，如果是拷贝则实际不需要使用new局部变量即可		
+			map<string,string> p;	
+			StringParameter[ExecuteId] = p;	       //   注意这里是拷贝
 		}
-		StringParameter[ExecuteId][name] = value;  //   这里这么写是对象拷贝还是引用,name,value的作用域我们不是很清楚可能随时消失
+		StringParameter[ExecuteId][name] = value;  //   这里赋值实际上是通过value先创造出一个string
 	}catch(...){}
 	::LeaveCriticalSection(&_StringParameter); // 释放变量StringParameter	 
 }

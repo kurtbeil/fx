@@ -18,7 +18,7 @@
 #property indicator_color1 Blue
 #property indicator_color2 Yellow
 #property indicator_color3 Red
-#property indicator_color4 Green
+#property indicator_color4 Yellow
 
 
 #define LOGGING  1
@@ -204,20 +204,20 @@ int init()
    // 初始化指标的属性
    IndicatorBuffers(4);          
    //-----------------------------
-   SetIndexStyle(0,DRAW_ARROW,0,0.5);
-   SetIndexArrow(0,SYMBOL_ARROWUP);
+   SetIndexStyle(0,DRAW_ARROW,0,2);
+   SetIndexArrow(0,236);
    SetIndexBuffer(0,HisBuyOpenBuffer);     
    //-----------------------------
-   SetIndexStyle(1,DRAW_ARROW,0,0.5);
-   SetIndexArrow(1,SYMBOL_ARROWDOWN);
+   SetIndexStyle(1,DRAW_ARROW,0,2);
+   SetIndexArrow(1,237);
    SetIndexBuffer(1,HisBuyCloseBuffer);     
    //-----------------------------
-   SetIndexStyle(2,DRAW_ARROW,0,0.5);
-   SetIndexArrow(2,SYMBOL_ARROWDOWN);
+   SetIndexStyle(2,DRAW_ARROW,0,2);
+   SetIndexArrow(2,238);
    SetIndexBuffer(2,HisSellOpenBuffer);     
    //-----------------------------
-   SetIndexStyle(3,DRAW_ARROW,0,0.5);
-   SetIndexArrow(3,SYMBOL_ARROWUP);
+   SetIndexStyle(3,DRAW_ARROW,0,2);
+   SetIndexArrow(3,235);
    SetIndexBuffer(3,HisSellCloseBuffer); 
    
    return(0);

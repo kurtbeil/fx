@@ -17,3 +17,5 @@ void ClearTicketCloseQueue();
 void WriteLog(string msg) ;
 void WriteData(string dataname,string data);
 
+string GetOrderTypeName(int ordertype);
+

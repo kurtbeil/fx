@@ -3,14 +3,16 @@
 #include <common.mqh>
 
 
+
+
 string GetFileStamp() {
 	string stamp =  "(" +
 	                "ExecuteId=" + GetExecuteId()  +
 	                ",Expert=" + GetMainExpertName()+
-					",Symbol=" + Symbol()+
-					",Period=" + Period()+											
+	                ",Symbol=" + Symbol()+
+	                ",Period=" + Period()+
 	                ",Account=" + AccountNumber()  +
-	                ",AccountServer=" + AccountServer() +					
+	                ",AccountServer=" + AccountServer() +
 	                // ",AccountName=" + AccountName()  +
 	                // ",TerminalName=" + TerminalName() +
 	                ")" ;
@@ -124,6 +126,34 @@ void ClearTicketCloseQueue() {
 	}
 	TicketCloseQueue_Count = 0;
 }
+
+string GetOrderTypeName(int ordertype) {
+	string result;
+	switch(ordertype) {
+	case OP_BUY:
+		result = "BUY";
+		break;
+	case OP_SELL :
+		result = "SELL";
+		break;
+	case OP_BUYLIMIT :
+		result = "BUYLIMIT";
+		break;
+	case OP_BUYSTOP :
+		result = "BUYSTOP";
+		break;
+	case OP_SELLLIMIT :
+		result = "SELLLIMIT";
+		break;
+	case OP_SELLSTOP :
+		result = "SELLSTOP";
+		break;
+	default:
+		result="NULL";
+	}
+	return (result);
+}
+
 
 
 
