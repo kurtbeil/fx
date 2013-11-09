@@ -207,17 +207,17 @@ double getLots(){
 
 
 int start() {
-	Print("-----0-----");
+	//Print("-----0-----");
 	OnStartBegin();
 	//if (IsFirstTick()) {
-	Print("-----1-----");
+	//Print("-----1-----");
 	checkForOpen();
-	Print("-----2-----");
+	//Print("-----2-----");
 	checkForClose();
-	Print("-----3-----");
+	//Print("-----3-----");
 	//}
 	OnStartEnd();
-	Print("-----4-----");
+	//Print("-----4-----");
 }
 
 

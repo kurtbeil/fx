@@ -14,30 +14,11 @@ CRITICAL_SECTION _GenerateExecuteId;
 // 限价单队列的事务锁
 CRITICAL_SECTION _LimitOrderQueue;
 
-
-BOOL APIENTRY DllMain( HANDLE hModule, 
-                       DWORD  ul_reason_for_call, 
-                       LPVOID lpReserved
-					 )
-{
-	::InitializeCriticalSection(&_StringParameter);
-	::InitializeCriticalSection(&_GenerateExecuteId);
-	::InitializeCriticalSection(&_LimitOrderQueue);
-	switch (ul_reason_for_call)
-	{
-		case DLL_PROCESS_ATTACH:
-		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
-		case DLL_PROCESS_DETACH:
-			break;
-    }
-    return TRUE;
-}
-
 /*----------------------------------------------
 --                输出日志过程                --
 -----------------------------------------------*/
 
+char * logfile = "c:\\CppUtility.log";
 
 void FormatTime(time_t t, char *strTime)
 {
@@ -55,23 +36,78 @@ void WriteLog(char * msg){
 	char strTime[1024];
 	time_t t = time(NULL);
 	FormatTime(t,strTime);
-    if (fp=fopen("c:\\CppUtility.log","a+")){
+    if (fp=fopen(logfile,"a+")){
 		fprintf(fp,"%s:%s\n",strTime,msg);
 		fclose(fp);
 	}
 }
 
 /*----------------------------------------------
+--                dll初始化过程               --
+-----------------------------------------------*/
+
+
+BOOL APIENTRY DllMain( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved
+					 )
+{
+	//char logMsg[1204];	
+	
+	switch (ul_reason_for_call)
+	{
+		case DLL_PROCESS_ATTACH:
+			InitializeCriticalSection(&_StringParameter);
+			InitializeCriticalSection(&_GenerateExecuteId);
+			InitializeCriticalSection(&_LimitOrderQueue);
+			//remove(logfile);
+			break;
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+    }
+	/*
+	sprintf(
+		logMsg,"_StringParameter=%0x,_GenerateExecuteId=%0x,_LimitOrderQueue=%0x,CurThreadId=%d",
+		&_StringParameter,&_GenerateExecuteId,&_LimitOrderQueue,GetCurrentThreadId()
+	);
+	WriteLog(logMsg);
+	*/
+    return TRUE;
+}
+
+
+/*----------------------------------------------
 --             自定义的关键区进出过程         --
 -----------------------------------------------*/
 
 void LockCS(CRITICAL_SECTION * cs){
+	char logMsg[1204];	
+	
+	/*
+	static i = 0;	
+	if (i<100){
+		sprintf(logMsg,"查看数据(befere enter):LockCount=%d,OwningThread=%d,CurThread=%d",cs->LockCount,cs->OwningThread,GetCurrentThreadId());
+		WriteLog(logMsg);		
+	}
+	*/
+
 	if(!TryEnterCriticalSection(cs)){
 		// 执行到这里显然还是会将当前进程锁死
 		// 我们只是希望在此之前记录下一些信息确定死锁确实发生在此处
-		WriteLog("发生死锁");
+		sprintf(logMsg,"发生死锁! LockCount=%d,OwningThread=%d,CurThread=%d,cs%0d",cs->LockCount,cs->OwningThread,GetCurrentThreadId());		
+		WriteLog(logMsg);
 		EnterCriticalSection(cs);
 	}
+	
+	/*
+	if (i<100){
+		sprintf(logMsg,"查看数据(befere enter):LockCount=%d,OwningThread=%d,CurThread=%d",cs->LockCount,cs->OwningThread,GetCurrentThreadId());
+		WriteLog(logMsg);
+	}
+	i++;	
+	*/
 }
 
 void UnlockCS(CRITICAL_SECTION * cs){
