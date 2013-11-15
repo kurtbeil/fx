@@ -12,9 +12,9 @@ bool IsFirstTick();
 // 交易相关
 int CreatePosition(string symbol,int cmd,double lots);
 void ClosePosition(int ticket);
-int PositionCount(string symbol,int cmd);
 double StandardPointSize();
-
+int PositionCount(string symbol,int cmd);
+datetime GetLastPositionOpenTime(string symbol,int cmd);
 
 
 // 订单关闭队列功能

@@ -59,18 +59,7 @@ double GetSymbolSlipPoints(string symbol) {
 }
 
 
-// magic 参数需要去掉了  顺带需要修改 scalping.mq4  GetSlipPoints 也需要修改
-int PositionCount(string symbol,int cmd) {
-	int magic = GetExecuteId();
-	int cnt=0;
-	for( int i=0; i<OrdersTotal(); i++ ) {
-		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
-		if ( OrderSymbol() != symbol ) continue;
-		if ( magic != -1 && OrderMagicNumber() != magic ) continue;
-		if ( OrderType() == cmd ) cnt++ ;
-	}
-	return(cnt);
-}
+
 
 
 // magic 参数需要去掉了 顺带需要修改 scalping.mq4,  GetSlipPoints 也需要修改
@@ -110,6 +99,35 @@ void ClosePosition(int ticket) {
 		i--;
 	}
 }
+
+
+// magic 参数需要去掉了  顺带需要修改 scalping.mq4  GetSlipPoints 也需要修改
+int PositionCount(string symbol,int cmd) {
+	int magic = GetExecuteId();
+	int cnt=0;
+	for( int i=0; i<OrdersTotal(); i++ ) {
+		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
+		if ( OrderSymbol() != symbol ) continue;
+		//if ( magic != -1 && OrderMagicNumber() != magic ) continue;
+		if ( OrderMagicNumber() != magic ) continue;
+		if ( OrderType() == cmd ) cnt++ ;
+	}
+	return(cnt);
+}
+
+datetime GetLastPositionOpenTime(string symbol,int cmd){
+	int magic = GetExecuteId();
+	datetime time=0;
+	for( int i=0; i<OrdersTotal(); i++ ) {
+		if ( OrderSelect(i,SELECT_BY_POS,MODE_TRADES) == false ) break;
+		if ( OrderSymbol() != symbol ) continue;
+		if ( OrderMagicNumber() != magic ) continue;
+		if ( OrderType() != cmd )  continue;
+		if ( OrderOpenTime() > time )  time  = OrderOpenTime();		
+	}
+	return(time);
+}
+
 
 // 判断是否是第1跳
 bool IsFirstTick() {
