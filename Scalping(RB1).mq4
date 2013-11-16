@@ -190,7 +190,7 @@ void checkForClose() {
 
 
 double getLots() {
-	return (2);
+	return (0.01);
 }
 
 
