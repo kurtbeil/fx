@@ -22,8 +22,8 @@ double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
 
-int max_long_position = 5;
-int max_short_position = 5;
+int max_long_position = 3;
+int max_short_position = 3;
 
 // 交易最长时间范围设定
 double trading_length = 300;
