@@ -31,9 +31,9 @@ double trading_length = 300;
 int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
-	long_tp_size = StandardPointSize() *  2.5;
+	long_tp_size = StandardPointSize() *  2.8;
 	long_sl_size =  StandardPointSize() *  40;
-	short_tp_size = StandardPointSize() * 2.5;
+	short_tp_size = StandardPointSize() * 2.8;
 	short_sl_size = StandardPointSize() * 40;
 }
 
