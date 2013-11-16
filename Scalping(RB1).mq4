@@ -22,8 +22,8 @@ double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
 
-int max_long_position = 3;
-int max_short_position = 3;
+int max_long_position = 5;
+int max_short_position = 5;
 
 // 交易最长时间范围设定
 double trading_length = 300;
@@ -32,9 +32,9 @@ int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
 	long_tp_size = StandardPointSize() *  2.5;
-	long_sl_size =  StandardPointSize() *  18;
+	long_sl_size =  StandardPointSize() *  40;
 	short_tp_size = StandardPointSize() * 2.5;
-	short_sl_size = StandardPointSize() * 18;
+	short_sl_size = StandardPointSize() * 40;
 }
 
 
@@ -190,7 +190,7 @@ void checkForClose() {
 
 
 double getLots() {
-	return (0.01);
+	return (2);
 }
 
 
