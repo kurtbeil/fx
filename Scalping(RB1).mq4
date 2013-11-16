@@ -22,8 +22,8 @@ double long_sl_size = 0;
 double short_tp_size = 0;
 double short_sl_size = 0;
 
-int max_long_position = 2;
-int max_short_position = 2;
+int max_long_position = 3;
+int max_short_position = 3;
 
 // 交易最长时间范围设定
 double trading_length = 300;
@@ -31,9 +31,9 @@ double trading_length = 300;
 int init() {
 	OnInitBegin(WindowExpertName());
 	magic = GetExecuteId();
-	long_tp_size = StandardPointSize() *  2;
+	long_tp_size = StandardPointSize() *  2.5;
 	long_sl_size =  StandardPointSize() *  18;
-	short_tp_size = StandardPointSize() * 2;
+	short_tp_size = StandardPointSize() * 2.5;
 	short_sl_size = StandardPointSize() * 18;
 }
 
@@ -76,10 +76,11 @@ void checkForOpen() {
 			// 检查是否超过对大头寸允许数量
 			if (PositionCount(Symbol(),OP_BUY)  + CppGetLimitOrderCountBy(Symbol(),OP_BUY) + 1 <=  max_long_position ) {
 				// 打开同方向头寸必须间隔15分钟
-				if ( MinutesBetween(TimeCurrent(),GetLastPositionOpenTime(Symbol(),OP_BUY))>15 ) {
+				if ( MinutesBetween(TimeCurrent(),GetLastPositionOpenTime(Symbol(),OP_BUY))>15 &&
+				        MinutesBetween(TimeCurrent(),CppGetLastLimitOrderCrtTimeBy(Symbol(),OP_BUY))>15
+				   ) {
 					if ( Low[1] < bands_low ) {
 						//Print("Try to open a buy position");
-
 						CppCreateLimitOrder(Symbol(),OP_BUY,Ask-1*StandardPointSize(),getLots(),TimeCurrent()+10*60);
 					}
 				}
@@ -89,7 +90,9 @@ void checkForOpen() {
 			// 检查是否超过对大头寸允许数量
 			if (PositionCount(Symbol(),OP_SELL)  + CppGetLimitOrderCountBy(Symbol(),OP_SELL)  + 1 <= max_short_position) {
 				// 打开同方向头寸必须间隔15分钟
-				if ( MinutesBetween(TimeCurrent(),GetLastPositionOpenTime(Symbol(),OP_SELL))>15 ) {
+				if ( MinutesBetween(TimeCurrent(),GetLastPositionOpenTime(Symbol(),OP_SELL))>15 &&
+				        MinutesBetween(TimeCurrent(),CppGetLastLimitOrderCrtTimeBy(Symbol(),OP_SELL)) > 15
+				   ) {
 					if ( High[1] > bands_high ) {
 						//Print("Try to open a sell position");
 						CppCreateLimitOrder(Symbol(),OP_SELL,Bid+1*StandardPointSize(),getLots(),TimeCurrent()+10*60);

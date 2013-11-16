@@ -6,7 +6,7 @@
 string GlobalStringGet(int ExecuteId,string name);
 void GlobalStringSet(int ExecuteId,string name,string value);
 int GenerateExecuteId();
-int CreateLimitOrder(int ExecuteId,string symbol,int type,double price,double lots,int expdate);
+int CreateLimitOrder(int ExecuteId,string symbol,int type,double price,double lots,int expdate,int createtime);
 int GetLimitOrderCount(int ExecuteId);
 int GetLimitOrderId(int ExecuteId);
 string GetLimitOrderSymbol(int ExecuteId);
@@ -15,6 +15,7 @@ double GetLimitOrderPrice(int ExecuteId);
 double GetLimitOrderLots(int ExecuteId);
 double GetLimitOrderSlip(int ExecuteId);
 int GetLimitOrderExpdate(int ExecuteId);
+int GetLimitOrderCreateTime(int ExecuteId);
 void RemoveLimitOrder(int ExecuteId);
 void TurnLimitOrder(int ExecuteId);
 
@@ -37,7 +38,7 @@ void CppGlobalStringSet(string name,string value) {
 // 近距离限价单功能的数据结构支持
 void CppCreateLimitOrder(string symbol,int type,double price,double lots,int expdate) {
 	//  调用cpp库保存元素到队列
-	int orderid = CreateLimitOrder(GetExecuteId(),symbol,type,price,lots,expdate);
+	int orderid = CreateLimitOrder(GetExecuteId(),symbol,type,price,lots,expdate,TimeCurrent());
 	//  在图表上标注
 	string objectname = GetExecuteId() + "#LimitOrder#" + orderid;
 	ObjectCreate(objectname, OBJ_HLINE, 0, 0,price);
@@ -82,6 +83,11 @@ int CppGetLimitOrderExpdate() {
 	return(GetLimitOrderExpdate(GetExecuteId()));
 }
 
+int CppGetLimitOrderCreateTime() {
+	return(GetLimitOrderCreateTime(GetExecuteId()));
+}
+
+
 void CppRemoveLimitOrder() {
 	int orderid = CppGetLimitOrderId() ;
 	if (orderid != -1) {
@@ -98,7 +104,6 @@ void CppTurnLimitOrder() {
 }
 
 
-
 int CppGetLimitOrderCountBy(string symbol,int  cmd) {
 	int count = 0;
 	int ordercnt = CppGetLimitOrderCount();	
@@ -109,6 +114,19 @@ int CppGetLimitOrderCountBy(string symbol,int  cmd) {
 		CppTurnLimitOrder();
 	}		
 	return (count);
+}
+
+
+int CppGetLastLimitOrderCrtTimeBy(string symbol,int  cmd) {
+	datetime time = 0;
+	int ordercnt = CppGetLimitOrderCount();	
+	for(int i = 0; i < ordercnt; i++) {
+		if (CppGetLimitOrderSymbol() ==  symbol && CppGetLimitOrderType() == cmd ){
+			if (CppGetLimitOrderCreateTime() > time) time = CppGetLimitOrderCreateTime();
+		}
+		CppTurnLimitOrder();
+	}		
+	return (time);
 }
 
 

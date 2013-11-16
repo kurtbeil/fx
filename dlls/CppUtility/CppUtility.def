@@ -10,5 +10,6 @@ LIBRARY CppUtility
 		 GetLimitOrderPrice
 		 GetLimitOrderLots
 		 GetLimitOrderExpdate
+		 GetLimitOrderCreateTime
 		 RemoveLimitOrder
 		 TurnLimitOrder

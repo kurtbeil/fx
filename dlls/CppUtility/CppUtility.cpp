@@ -186,6 +186,7 @@ struct LimitOrder{
 	double price;
 	double lots;
 	int expdate;
+	int createtime;
 };
 
 int LimitOrderIdSeq = 1;
@@ -194,7 +195,7 @@ int LimitOrderIdSeq = 1;
 map<int,queue<LimitOrder> > LimitOrderQueue;
 
 
-MT4_EXPFUNC int CreateLimitOrder(int ExecuteId,char * symbol,int type,double price,double lots,int expdate){
+MT4_EXPFUNC int CreateLimitOrder(int ExecuteId,char * symbol,int type,double price,double lots,int expdate,int createtime){
 	LockCS(&_LimitOrderQueue);   // 锁定变量LimitOrderQueue
     LimitOrder order;
 	try{
@@ -208,6 +209,7 @@ MT4_EXPFUNC int CreateLimitOrder(int ExecuteId,char * symbol,int type,double pri
 		order.price = price;
 		order.lots = lots;
 		order.expdate = expdate;
+		order.createtime = createtime;
 		LimitOrderQueue[ExecuteId].push(order);        //   注意这里是变量拷贝
 	}catch(...){}
 	UnlockCS(&_LimitOrderQueue); // 释放变量LimitOrderQueue 
@@ -328,6 +330,25 @@ MT4_EXPFUNC int GetLimitOrderExpdate(int ExecuteId){
 		if ( LimitOrderQueue.count(ExecuteId) > 0){ 
 			if(LimitOrderQueue[ExecuteId].size() > 0){
 				result = LimitOrderQueue[ExecuteId].front().expdate;
+			}else{
+				result = -1;
+			}
+		}else{
+			result = -1;
+		}
+	}catch(...){}
+	UnlockCS(&_LimitOrderQueue);  // 释放变量LimitOrderQueue 
+	return(result);
+}
+
+
+MT4_EXPFUNC int GetLimitOrderCreateTime(int ExecuteId){
+	int result;
+	LockCS(&_LimitOrderQueue);  // 锁定变量LimitOrderQueue
+	try{	
+		if ( LimitOrderQueue.count(ExecuteId) > 0){ 
+			if(LimitOrderQueue[ExecuteId].size() > 0){
+				result = LimitOrderQueue[ExecuteId].front().createtime;
 			}else{
 				result = -1;
 			}
