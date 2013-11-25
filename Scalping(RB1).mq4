@@ -62,7 +62,7 @@ bool isShortTradingHour() {
 
 
 void checkForOpen() {
-	if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的23点以后不再开仓
+	if ( DayOfWeek()== 5  &&  Hour() >= 23  )  return ;    // 周五的晚上不开仓
 	if ( DayOfWeek()== 1 ) return;  // 周一凌晨不交易
 	if ( Year() == 2013 && Month() == 8 && Day() == 20 ) return;  // 避开20138020的特殊情况
 
