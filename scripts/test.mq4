@@ -18,7 +18,7 @@ int deinit(){
 
 
 int start() {	
-	ObjectsDeleteAll();
+	//ObjectsDeleteAll();
 	//ObjectCreate("text_object", OBJ_ARROW, 0, Time[1], Ask);
 	//ObjectSet("MyFibo", OBJPROP_ARROWCODE, );
 	//int ticket = CreatePosition(Symbol(),OP_SELL,0.01);
@@ -29,6 +29,7 @@ int start() {
 	//CreatePositionLine("line",OP_SELL,Time[10],Bid,Time[0],Ask);
 	
 	
-	DrawPosition(123,Symbol(),0.05,OP_SELL,Time[10],Bid,Time[0],Ask);
+	//DrawPosition(123,Symbol(),0.05,OP_SELL,Time[10],Bid,Time[0],Ask);
 	
+	CreatePosition(Symbol(),OP_SELL,0.01);
 }
