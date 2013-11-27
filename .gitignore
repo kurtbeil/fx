@@ -1,6 +1,5 @@
 *.ex4
 /HIS/*
-/config/*
 /files/*
 /presets/*
 /logs/*
@@ -13,7 +12,7 @@ mqlcache.dat
 /dlls/*/*.plg
 /dlls/*/*.opt
 /dlls/*/*.ncb
-
+*.pyc
 
 
 
