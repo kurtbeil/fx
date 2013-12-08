@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CPPUTILITY_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CPPUTILITY_EXPORTS" /D "_WINDLL" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "CPPUTILITY_EXPORTS" /D "_WINDLL" /D _WIN32_WINNT=0x0501 /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "NDEBUG"
@@ -59,7 +59,7 @@ InputPath=.\Release\CppUtility.dll
 SOURCE="$(InputPath)"
 
 "output.log" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy /Y debug\*.dll ..\..\libraries
+	copy /Y release\*.dll ..\..\libraries
 
 # End Custom Build
 

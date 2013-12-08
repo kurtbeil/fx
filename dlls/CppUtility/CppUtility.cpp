@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "CppUtility.h"
+#include <Python.h>
+
 
 // 全局字符串变量的事务锁
 CRITICAL_SECTION _StringParameter; 
@@ -13,6 +15,10 @@ CRITICAL_SECTION _GenerateExecuteId;
 
 // 限价单队列的事务锁
 CRITICAL_SECTION _LimitOrderQueue;
+
+// python配置数据读取
+CRITICAL_SECTION _PyConfigRead;
+
 
 /*----------------------------------------------
 --                输出日志过程                --
@@ -57,14 +63,21 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	switch (ul_reason_for_call)
 	{
 		case DLL_PROCESS_ATTACH:
+			// 初始化python运行环境
+			Py_Initialize();
+			// 初始化临界区变量
 			InitializeCriticalSection(&_StringParameter);
 			InitializeCriticalSection(&_GenerateExecuteId);
 			InitializeCriticalSection(&_LimitOrderQueue);
+			InitializeCriticalSection(&_PyConfigRead);			
+			
 			//remove(logfile);
 			break;
 		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
+		case DLL_THREAD_DETACH:			
 		case DLL_PROCESS_DETACH:
+			// 清理python运行环境			
+			Py_Finalize();	
 			break;
     }
 	/*
@@ -385,5 +398,208 @@ MT4_EXPFUNC void TurnLimitOrder(int ExecuteId){
 	}catch(...){}
 	UnlockCS(&_LimitOrderQueue);  // 释放变量LimitOrderQueue 
 }
+
+
+/*----------------------------------------------
+--        访问python配置文件相关功能          --
+-----------------------------------------------*/
+
+void ClearPyRef(PyObject * pol[],int size){
+	for(int i=0; i<size; i++){
+	   Py_DECREF(pol[i]);
+	}
+}
+
+int PyObjectToString(PyObject * pObj,char * buf,int bufsize){
+	
+	int i=0,res;
+	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+	char * pStr=NULL;
+	
+	// 导入模块
+	pMod = PyImport_ImportModule("__builtin__");
+	if ( pMod == NULL ) {
+		return (-1);		
+	}
+	pol[i++] = pMod;
+
+	// 定位方法
+	pFun = PyObject_GetAttrString(pMod,"str");
+	if ( pFun == NULL ) {
+		ClearPyRef(pol,i);
+		return (-1);		
+	}
+    pol[i++] = pFun;
+	
+	// 准备参数
+	pArgs = Py_BuildValue("(O)",pObj);
+	if ( pArgs == NULL ) {
+		ClearPyRef(pol,i);
+		return (-3);
+	}
+	pol[i++] = pArgs;
+	
+	// 调用方法
+	pRes = PyEval_CallObject(pFun,pArgs);
+	if ( pRes == NULL ) {
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+	pol[i++] = pRes;
+
+	// 获取返回参数
+	PyArg_Parse(pRes,"s",&pStr);
+	if ( pStr == NULL ) {
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+		
+	if (strlen(pStr) == 0 || strlen(pStr) + 1 > bufsize){
+		res = -1;
+	}else{
+		strcpy(buf,pStr);
+		res = 0;
+	}		
+	
+	Py_DECREF(pStr);		
+	ClearPyRef(pol,i);		
+	return(res);
+}
+
+// 注意:该函数不能直接调用在MT4过程中调用
+int PyObjectType(PyObject * pObj,char * buf,int bufsize){
+	
+	int i=0,j,res,len;
+	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+	char * pStr=NULL;
+
+	// 导入模块
+	pMod = PyImport_ImportModule("__builtin__");
+	if ( pMod == NULL ) {
+		return (-1);		
+	}
+	pol[i++] = pMod;
+
+	// 定位方法
+	pFun = PyObject_GetAttrString(pMod,"type");
+	if ( pFun == NULL ) {
+		ClearPyRef(pol,i);
+		return (-1);		
+	}
+    pol[i++] = pFun;
+	
+	// 准备参数
+	pArgs = Py_BuildValue("(O)",pObj);
+	if ( pArgs == NULL ) {
+		ClearPyRef(pol,i);
+		return (-3);
+	}
+	pol[i++] = pArgs;
+	
+	// 调用方法
+	pRes = PyEval_CallObject(pFun,pArgs);
+	if ( pRes == NULL ) {
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+	pol[i++] = pRes;
+	
+	// 将返回参数转化为字符串
+	res = PyObjectToString(pRes,buf,bufsize);
+	if (res){
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+	
+	// python 类型的字符串表示 <type '...'>
+	// 去掉<type '...'> 保留类型名称串
+	len = strlen(buf);	
+	for(j=0; j<len-9; j++){
+		buf[j] = buf[j+7];
+	}
+	buf[j] = 0;
+	
+	ClearPyRef(pol,i);		
+	return(0);
+
+}
+
+
+int PyConfigReadValue(char* file,char* var,char* bufValue,int bsValue,char * bufType,int bsType){
+    
+	int i=0,res;
+	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+	char * pStr=NULL;
+	
+	// 导入模块
+	pMod = PyImport_ImportModule("fxclient.mt4lib.config");
+	if ( pMod == NULL ) {
+		return (-1);		
+	}
+	pol[i++] = pMod;
+	
+	// 定位方法
+	pFun = PyObject_GetAttrString(pMod,"ReadValue");
+	if ( pFun == NULL ) {
+		ClearPyRef(pol,i);
+		return (-1);		
+	}
+    pol[i++] = pFun;
+
+	// 邦定参数
+	pArgs = Py_BuildValue("(s,s)",file,var);
+	if ( pArgs == NULL ) {
+		ClearPyRef(pol,i);
+		return (-1);
+	}
+	pol[i++] = pArgs;
+
+	// 调用方法
+	pRes = PyEval_CallObject(pFun,pArgs);		
+	if ( pRes == NULL ) {
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+	pol[i++] = pRes;
+
+	// 将返回参数转化为字符串
+	res = PyObjectToString(pRes,bufValue,bsValue);
+	if (res){
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+
+	// 读取值类型
+	res = PyObjectType(pRes,bufType,bsType);
+	if (res){
+		ClearPyRef(pol,i);
+		return(-1);
+	}
+
+	ClearPyRef(pol,i);   // 释放python变量引用
+	return(0);
+}
+
+
+__declspec( thread ) char bufPyConfigRead[1024];
+char * PyConfigRead(char* file,char* var){
+	int res;
+	char bufValue[512],bufType[256];	
+	
+	LockCS(&_PyConfigRead); // 锁定变量_PyConfigRead
+	
+	res = PyConfigReadValue(file,var,bufValue,sizeof(bufValue),bufType,sizeof(bufType));
+	if (res != 0){
+		strcpy(bufType,"NoneType");
+		strcpy(bufValue,"None");
+	}
+	sprintf(bufPyConfigRead,"{'type':%s,'value':%s}",bufType,bufValue);
+	
+	UnlockCS(&_PyConfigRead); // 释放变量_PyConfigRead
+	return(bufPyConfigRead);
+}
+
+
+
 
 

@@ -20,3 +20,12 @@ void CppRemoveLimitOrder();
 void CppTurnLimitOrder();
 int CppGetLimitOrderCountBy(string symbol,int  cmd) ;
 int CppGetLastLimitOrderCrtTimeBy(string symbol,int  cmd);
+
+
+// 配置文件读取
+string CppPyConfigRead(string file,string var);
+string CppPyResultReadType(string PyResult);
+string CppPyResultReadValue(string PyResult);
+double CppPyConfigReadDouble(string file,string var,double df);
+int CppPyConfigReadInt(string file,string var,int df);
+

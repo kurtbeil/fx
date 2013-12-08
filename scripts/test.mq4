@@ -18,18 +18,26 @@ int deinit(){
 
 
 int start() {	
-	//ObjectsDeleteAll();
-	//ObjectCreate("text_object", OBJ_ARROW, 0, Time[1], Ask);
-	//ObjectSet("MyFibo", OBJPROP_ARROWCODE, );
-	//int ticket = CreatePosition(Symbol(),OP_SELL,0.01);
-	//ClosePosition(ticket);
+	string file = "I:\\Program Files\\HotForex MetaTrader\\experts\\config\\pycfg\\Scalping.py";
+	string var = "config/HF Markets Ltd/Micro/EURCAD/M1/bands_period";
+	int p = 0,q=0;
 	
-	//CreateOpenArrow("open",OP_SELL,Time[10],Bid);
-	//CreateCloseArrow("close",OP_SELL,Time[0],Ask);	
-	//CreatePositionLine("line",OP_SELL,Time[10],Bid,Time[0],Ask);
+	string result = CppPyConfigRead(file,var);		
+	Print("result=",result);
+	string type = CppPyResultReadType(result);
+	Print("type=",type);
+	string value = CppPyResultReadValue(result);
+	Print("value=",value);
+	
+	double d1 = CppPyConfigReadDouble(file,var,1.0);
+	Print("d1=",d1);
+	
+	int d2 = CppPyConfigReadInt(file,var,1);
+	Print("d1=",d1);
 	
 	
-	//DrawPosition(123,Symbol(),0.05,OP_SELL,Time[10],Bid,Time[0],Ask);
+	//pos = StringFind(result,":",7+1);
+	//Print("pos=",pos);
 	
-	CreatePosition(Symbol(),OP_SELL,0.01);
+	
 }

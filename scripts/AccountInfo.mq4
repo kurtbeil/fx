@@ -19,6 +19,10 @@ int start() {
 	Print("Terminal Name = ",TerminalName());
 	Print("Terminal Path = ",TerminalPath());
 	Print("Account Server = ",AccountServer());
+	Print("Account Number = ",AccountNumber());
+
+
+
 
 	
 

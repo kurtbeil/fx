@@ -3,9 +3,12 @@
 #include <common.mqh>
 
 #import "CppUtility.dll"
+// 全局变量
 string GlobalStringGet(int ExecuteId,string name);
 void GlobalStringSet(int ExecuteId,string name,string value);
+// 执行标识符
 int GenerateExecuteId();
+// 限价单
 int CreateLimitOrder(int ExecuteId,string symbol,int type,double price,double lots,int expdate,int createtime);
 int GetLimitOrderCount(int ExecuteId);
 int GetLimitOrderId(int ExecuteId);
@@ -18,6 +21,8 @@ int GetLimitOrderExpdate(int ExecuteId);
 int GetLimitOrderCreateTime(int ExecuteId);
 void RemoveLimitOrder(int ExecuteId);
 void TurnLimitOrder(int ExecuteId);
+// 配置数据读取
+string PyConfigRead(string file,string var);
 
 
 
@@ -128,5 +133,67 @@ int CppGetLastLimitOrderCrtTimeBy(string symbol,int  cmd) {
 	}		
 	return (time);
 }
+
+// 读取py配置文件
+string CppPyConfigRead(string file,string var){
+	string result = PyConfigRead(file,var);
+	return (result);
+}
+
+// 解析py配置返回字串中的类型字串
+string CppPyResultReadType(string PyResult){
+	int i = StringFind(PyResult,":",0);
+	int j = StringFind(PyResult,",",0);		
+    string type = StringSubstr(PyResult,i+1,j-i-1);
+	return (type);
+}
+
+// 解析py配置返回字串中的具体值得字串
+string CppPyResultReadValue(string PyResult){
+	string result = StringTrimRight(PyResult);
+	// 找到字符串中第2个":"的位置
+	int i = StringFind(PyResult,":",0);
+	i = StringFind(result,":",i+1);      
+    // 找到结束"}"的位置
+	int j = StringLen(result)-1;   
+	string value = StringSubstr(result,i+1,j-i-1);
+	return(value);
+}
+
+// 在配置数据中读取一个浮点数
+double CppPyConfigReadDouble(string file,string var,double df){
+	string pyresult = CppPyConfigRead(file,var);
+	string type = CppPyResultReadType(pyresult);
+	string value = CppPyResultReadValue(pyresult);
+	double result = df;
+	if ( type == "float" || type == "int" ) {
+		result = StrToDouble(value);
+	}else{		
+		Print("read var : \""+var+"\""+" failed");		
+		Print("default value : \"" + df + "\" is used");
+		Print("file =\""+file+"\"");
+	}
+	return(result);
+}
+
+// 在配置数据中读取一个浮点数
+int CppPyConfigReadInt(string file,string var,int df){
+	string pyresult = CppPyConfigRead(file,var);
+	string type = CppPyResultReadType(pyresult);
+	string value = CppPyResultReadValue(pyresult);
+	int result = df;
+	if ( type == "int" ) {
+		result = StrToInteger(value);
+	}else{		
+		Print("read var : \""+var+"\""+" failed");		
+		Print("default value : \"" + df + "\" is used");
+		Print("file =\""+file+"\"");
+	}
+	return(result);
+}
+
+
+
+
 
 

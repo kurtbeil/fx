@@ -13,3 +13,4 @@ LIBRARY CppUtility
 		 GetLimitOrderCreateTime
 		 RemoveLimitOrder
 		 TurnLimitOrder
+		 PyConfigRead
