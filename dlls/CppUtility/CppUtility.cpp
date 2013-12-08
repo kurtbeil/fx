@@ -17,7 +17,7 @@ CRITICAL_SECTION _GenerateExecuteId;
 CRITICAL_SECTION _LimitOrderQueue;
 
 // python配置数据读取
-CRITICAL_SECTION _PyConfigRead;
+CRITICAL_SECTION _PythonCall;
 
 
 /*----------------------------------------------
@@ -69,7 +69,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			InitializeCriticalSection(&_StringParameter);
 			InitializeCriticalSection(&_GenerateExecuteId);
 			InitializeCriticalSection(&_LimitOrderQueue);
-			InitializeCriticalSection(&_PyConfigRead);			
+			InitializeCriticalSection(&_PythonCall);			
 			
 			//remove(logfile);
 			break;
@@ -410,196 +410,284 @@ void ClearPyRef(PyObject * pol[],int size){
 	}
 }
 
-int PyObjectToString(PyObject * pObj,char * buf,int bufsize){
-	
-	int i=0,res;
-	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
-	char * pStr=NULL;
-	
-	// 导入模块
-	pMod = PyImport_ImportModule("__builtin__");
-	if ( pMod == NULL ) {
-		return (-1);		
-	}
-	pol[i++] = pMod;
 
-	// 定位方法
-	pFun = PyObject_GetAttrString(pMod,"str");
-	if ( pFun == NULL ) {
-		ClearPyRef(pol,i);
-		return (-1);		
-	}
-    pol[i++] = pFun;
+char * PyConfigReadFile(char* file){
+    __declspec( thread ) static char * buf=NULL;
 	
-	// 准备参数
-	pArgs = Py_BuildValue("(O)",pObj);
-	if ( pArgs == NULL ) {
-		ClearPyRef(pol,i);
-		return (-3);
-	}
-	pol[i++] = pArgs;
+	LockCS(&_PythonCall);  // 锁定python调用锁
+	__try{
+		int i=0;
+		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+		char * pStr=NULL;
 	
-	// 调用方法
-	pRes = PyEval_CallObject(pFun,pArgs);
-	if ( pRes == NULL ) {
-		ClearPyRef(pol,i);
-		return(-1);
-	}
-	pol[i++] = pRes;
+		// 如果上一次使用的缓冲区还未释放，则先将其释放，防止内存泄露
+		if(buf){
+			free(buf);
+			buf=NULL;
+		}
 
-	// 获取返回参数
-	PyArg_Parse(pRes,"s",&pStr);
-	if ( pStr == NULL ) {
-		ClearPyRef(pol,i);
-		return(-1);
-	}
-		
-	if (strlen(pStr) == 0 || strlen(pStr) + 1 > bufsize){
-		res = -1;
-	}else{
-		strcpy(buf,pStr);
-		res = 0;
-	}		
+		// 导入模块
+		pMod = PyImport_ImportModule("fxclient.mt4lib.config");
+		if ( pMod == NULL ) {
+			return (NULL);		
+		}
+		pol[i++] = pMod;
 	
-	Py_DECREF(pStr);		
-	ClearPyRef(pol,i);		
-	return(res);
-}
+		// 定位方法
+		pFun = PyObject_GetAttrString(pMod,"readFile");
+		if ( pFun == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);		
+		}
+		pol[i++] = pFun;
 
-// 注意:该函数不能直接调用在MT4过程中调用
-int PyObjectType(PyObject * pObj,char * buf,int bufsize){
-	
-	int i=0,j,res,len;
-	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
-	char * pStr=NULL;
+		// 邦定参数
+		pArgs = Py_BuildValue("(s)",file);
+		if ( pArgs == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);
+		}
+		pol[i++] = pArgs;
 
-	// 导入模块
-	pMod = PyImport_ImportModule("__builtin__");
-	if ( pMod == NULL ) {
-		return (-1);		
-	}
-	pol[i++] = pMod;
+		// 调用方法
+		pRes = PyEval_CallObject(pFun,pArgs);		
+		if ( pRes == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+		pol[i++] = pRes;
 
-	// 定位方法
-	pFun = PyObject_GetAttrString(pMod,"type");
-	if ( pFun == NULL ) {
-		ClearPyRef(pol,i);
-		return (-1);		
-	}
-    pol[i++] = pFun;
-	
-	// 准备参数
-	pArgs = Py_BuildValue("(O)",pObj);
-	if ( pArgs == NULL ) {
-		ClearPyRef(pol,i);
-		return (-3);
-	}
-	pol[i++] = pArgs;
-	
-	// 调用方法
-	pRes = PyEval_CallObject(pFun,pArgs);
-	if ( pRes == NULL ) {
-		ClearPyRef(pol,i);
-		return(-1);
-	}
-	pol[i++] = pRes;
-	
-	// 将返回参数转化为字符串
-	res = PyObjectToString(pRes,buf,bufsize);
-	if (res){
-		ClearPyRef(pol,i);
-		return(-1);
-	}
-	
-	// python 类型的字符串表示 <type '...'>
-	// 去掉<type '...'> 保留类型名称串
-	len = strlen(buf);	
-	for(j=0; j<len-9; j++){
-		buf[j] = buf[j+7];
-	}
-	buf[j] = 0;
-	
-	ClearPyRef(pol,i);		
-	return(0);
-
-}
-
-
-int PyConfigReadValue(char* file,char* var,char* bufValue,int bsValue,char * bufType,int bsType){
+		// 获取返回参数
+		PyArg_Parse(pRes,"s",&pStr);
+		if ( pStr == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
     
-	int i=0,res;
-	PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
-	char * pStr=NULL;
+		// 尝试分配缓冲区，失败返回值为NULL
+		buf = (char*) malloc(strlen(pStr)+1);
+		if (buf){
+			strcpy(buf,pStr);
+		}
+		// 释放python对象引用	
+		ClearPyRef(pol,i);
 	
-	// 导入模块
-	pMod = PyImport_ImportModule("fxclient.mt4lib.config");
-	if ( pMod == NULL ) {
-		return (-1);		
+	}__finally{
+		UnlockCS(&_PythonCall);       // 解开python调用锁
 	}
-	pol[i++] = pMod;
+	return(buf);
+}
+
 	
-	// 定位方法
-	pFun = PyObject_GetAttrString(pMod,"ReadValue");
-	if ( pFun == NULL ) {
-		ClearPyRef(pol,i);
-		return (-1);		
-	}
-    pol[i++] = pFun;
+char * PyReadDictValueStr(char * dictStr,char * path){
+    __declspec( thread ) static char * buf = NULL;
 
-	// 邦定参数
-	pArgs = Py_BuildValue("(s,s)",file,var);
-	if ( pArgs == NULL ) {
-		ClearPyRef(pol,i);
-		return (-1);
-	}
-	pol[i++] = pArgs;
+	LockCS(&_PythonCall);  // 锁定python调用锁
+	__try{
+		int i=0;
+		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+		char * pStr=NULL;
 
-	// 调用方法
-	pRes = PyEval_CallObject(pFun,pArgs);		
-	if ( pRes == NULL ) {
-		ClearPyRef(pol,i);
-		return(-1);
-	}
-	pol[i++] = pRes;
+		if(buf) {
+			free(buf);
+			buf = NULL;
+		}
+	
+		// 导入模块
+		pMod = PyImport_ImportModule("fxclient.mt4lib.config");
+		if ( pMod == NULL ) {
+			return (NULL);		
+		}
+		pol[i++] = pMod;
+	
+		// 定位方法
+		pFun = PyObject_GetAttrString(pMod,"readDictValueStr");
+		if ( pFun == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);		
+		}
+		pol[i++] = pFun;
 
-	// 将返回参数转化为字符串
-	res = PyObjectToString(pRes,bufValue,bsValue);
-	if (res){
-		ClearPyRef(pol,i);
-		return(-1);
-	}
+		// 邦定参数
+		pArgs = Py_BuildValue("(s,s)",dictStr,path);
+		if ( pArgs == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);
+		}
+		pol[i++] = pArgs;
 
-	// 读取值类型
-	res = PyObjectType(pRes,bufType,bsType);
-	if (res){
-		ClearPyRef(pol,i);
-		return(-1);
-	}
+		// 调用方法
+		pRes = PyEval_CallObject(pFun,pArgs);		
+		if ( pRes == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+		pol[i++] = pRes;
+	
+		// 获取返回参数
+		PyArg_Parse(pRes,"s",&pStr);
+		if ( pStr == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
 
-	ClearPyRef(pol,i);   // 释放python变量引用
-	return(0);
+		// 尝试分配缓冲区，失败返回值为NULL
+		buf = (char*) malloc(strlen(pStr)+1);
+		if (buf){
+			strcpy(buf,pStr);
+		}
+
+		ClearPyRef(pol,i);	
+	
+	}__finally{
+		UnlockCS(&_PythonCall);       // 解开python调用锁
+	}
+	return(buf);
 }
 
 
-__declspec( thread ) char bufPyConfigRead[1024];
-char * PyConfigRead(char* file,char* var){
-	int res;
-	char bufValue[512],bufType[256];	
+
+char * PyReadDictValueType(char * dictStr,char * path){
+	__declspec( thread ) static char * buf = NULL;	
+    
+	LockCS(&_PythonCall);  // 锁定python调用锁
+	__try{
+
+		int i=0,j,len;
+		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+		char * pStr=NULL;
+
+		if(buf) {
+			free(buf);
+			buf = NULL;
+		}
 	
-	LockCS(&_PyConfigRead); // 锁定变量_PyConfigRead
+		// 导入模块
+		pMod = PyImport_ImportModule("fxclient.mt4lib.config");
+		if ( pMod == NULL ) {
+			return (NULL);		
+		}
+		pol[i++] = pMod;
 	
-	res = PyConfigReadValue(file,var,bufValue,sizeof(bufValue),bufType,sizeof(bufType));
-	if (res != 0){
-		strcpy(bufType,"NoneType");
-		strcpy(bufValue,"None");
+		// 定位方法
+		pFun = PyObject_GetAttrString(pMod,"readDictValueType");
+		if ( pFun == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);		
+		}
+		pol[i++] = pFun;
+
+		// 邦定参数
+		pArgs = Py_BuildValue("(s,s)",dictStr,path);
+		if ( pArgs == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);
+		}
+		pol[i++] = pArgs;
+
+		// 调用方法
+		pRes = PyEval_CallObject(pFun,pArgs);		
+		if ( pRes == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+		pol[i++] = pRes;
+	
+		// 获取返回参数
+		PyArg_Parse(pRes,"s",&pStr);
+		if ( pStr == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+
+		// 尝试分配缓冲区，失败返回值为NULL
+		buf = (char*) malloc(strlen(pStr)+1);
+		if (buf){
+			strcpy(buf,pStr);
+			// python 类型的字符串表示 <type '...'>
+			// 去掉<type '...'> 保留类型名称串
+			len = strlen(buf);	
+			for(j=0; j<len-9; j++){
+				buf[j] = buf[j+7];
+			}
+			buf[j] = 0;
+		}
+		
+		ClearPyRef(pol,i);		
+
+	}__finally{
+		UnlockCS(&_PythonCall);       // 解开python调用锁
 	}
-	sprintf(bufPyConfigRead,"{'type':%s,'value':%s}",bufType,bufValue);
-	
-	UnlockCS(&_PyConfigRead); // 释放变量_PyConfigRead
-	return(bufPyConfigRead);
+	return(buf);
 }
 
+/*----------------------------------------------
+--       python访问服务器端相关功能           --
+-----------------------------------------------*/
 
+char * PyExpertRegistr(char * ExpertCode,char * AccountLoginId,char * AccountCompanyName,char * AccountServerName){
+	__declspec( thread ) static char * buf = NULL;
 
+	LockCS(&_PythonCall);  // 锁定python调用锁
+	__try{
 
+		int i=0;
+		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+		char * pStr=NULL;
 
+		if(buf){
+			free(buf);
+			buf = NULL;
+		}
+	
+		// 导入模块
+		pMod = PyImport_ImportModule("fxclient.mt4lib.service");
+		if ( pMod == NULL ) {
+			return (NULL);		
+		}
+		pol[i++] = pMod;
+	
+		// 定位方法
+		pFun = PyObject_GetAttrString(pMod,"expertRegister");
+		if ( pFun == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);		
+		}
+		pol[i++] = pFun;
+
+		// 邦定参数
+		pArgs = Py_BuildValue("(s,s,s,s)",ExpertCode,AccountLoginId,AccountCompanyName,AccountServerName);
+		if ( pArgs == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);
+		}
+		pol[i++] = pArgs;
+
+		// 调用方法
+		pRes = PyEval_CallObject(pFun,pArgs);		
+		if ( pRes == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+		pol[i++] = pRes;
+
+		// 获取返回参数
+		PyArg_Parse(pRes,"s",&pStr);
+		if ( pStr == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+    
+		// 尝试分配缓冲区，失败返回值为NULL
+		buf = (char*) malloc(strlen(pStr)+1);
+		if (buf){
+			strcpy(buf,pStr);
+		}
+
+		ClearPyRef(pol,i);	
+
+	}__finally{
+		UnlockCS(&_PythonCall);       // 解开python调用锁
+	}
+	return(buf);	
+}

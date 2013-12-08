@@ -13,4 +13,7 @@ LIBRARY CppUtility
 		 GetLimitOrderCreateTime
 		 RemoveLimitOrder
 		 TurnLimitOrder
-		 PyConfigRead
+		 PyConfigReadFile
+		 PyReadDictValueStr
+		 PyReadDictValueType
+		 PyExpertRegistr

@@ -22,8 +22,12 @@ int GetLimitOrderCreateTime(int ExecuteId);
 void RemoveLimitOrder(int ExecuteId);
 void TurnLimitOrder(int ExecuteId);
 // 配置数据读取
-string PyConfigRead(string file,string var);
+string PyConfigReadFile(string file);
+string PyReadDictValueStr(string dictStr,string path);
+string PyReadDictValueType(string dictStr,string path);
 
+// expert注册
+string PyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
 
 
 // 生成ExecuteId
@@ -134,33 +138,36 @@ int CppGetLastLimitOrderCrtTimeBy(string symbol,int  cmd) {
 	return (time);
 }
 
+
+
+
 // 读取py配置文件
-string CppPyConfigRead(string file,string var){
-	string result = PyConfigRead(file,var);
+string CppPyConfigReadFile(string file){
+	string result = PyConfigReadFile(file);
 	return (result);
 }
 
-// 解析py配置返回字串中的类型字串
-string CppPyResultReadType(string PyResult){
-	int i = StringFind(PyResult,":",0);
-	int j = StringFind(PyResult,",",0);		
-    string type = StringSubstr(PyResult,i+1,j-i-1);
-	return (type);
+
+// 解析配置数据，得到路径上的数据的类型
+string CppPyReadDictValueType(string dictStr,string path){
+	string result = PyReadDictValueType(dictStr,path);
+	return (result);
 }
 
 // 解析py配置返回字串中的具体值得字串
-string CppPyResultReadValue(string PyResult){
-	string result = StringTrimRight(PyResult);
-	// 找到字符串中第2个":"的位置
-	int i = StringFind(PyResult,":",0);
-	i = StringFind(result,":",i+1);      
-    // 找到结束"}"的位置
-	int j = StringLen(result)-1;   
-	string value = StringSubstr(result,i+1,j-i-1);
-	return(value);
+string CppPyReadDictValueStr(string dictStr,string path){
+	string result = PyReadDictValueStr(dictStr,path);
+	return (result);
+}
+
+// expert 注册
+string CppPyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName){
+    string result = PyExpertRegistr(ExpertCode,AccountLoginId,AccountCompanyName,AccountServerName);
+	return (result);
 }
 
 // 在配置数据中读取一个浮点数
+/*
 double CppPyConfigReadDouble(string file,string var,double df){
 	string pyresult = CppPyConfigRead(file,var);
 	string type = CppPyResultReadType(pyresult);
@@ -175,8 +182,10 @@ double CppPyConfigReadDouble(string file,string var,double df){
 	}
 	return(result);
 }
+*/
 
-// 在配置数据中读取一个浮点数
+// 在配置数据中读取一个整型数据
+/*
 int CppPyConfigReadInt(string file,string var,int df){
 	string pyresult = CppPyConfigRead(file,var);
 	string type = CppPyResultReadType(pyresult);
@@ -191,6 +200,7 @@ int CppPyConfigReadInt(string file,string var,int df){
 	}
 	return(result);
 }
+*/
 
 
 

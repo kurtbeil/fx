@@ -22,10 +22,11 @@ int CppGetLimitOrderCountBy(string symbol,int  cmd) ;
 int CppGetLastLimitOrderCrtTimeBy(string symbol,int  cmd);
 
 
-// 配置文件读取
-string CppPyConfigRead(string file,string var);
-string CppPyResultReadType(string PyResult);
-string CppPyResultReadValue(string PyResult);
-double CppPyConfigReadDouble(string file,string var,double df);
-int CppPyConfigReadInt(string file,string var,int df);
+// 配置文件访问
+string CppPyConfigReadFile(string file);
+string CppPyReadDictValueType(string dictStr,string path);
+string CppPyReadDictValueStr(string dictStr,string path);
+// 服务访问
+string CppPyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
+
 

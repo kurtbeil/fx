@@ -9,6 +9,7 @@ mqlcache.dat
 *.orig
 /scripts/lparams.txt
 /dlls/*/Debug/
+/dlls/*/Release/
 /dlls/*/*.plg
 /dlls/*/*.opt
 /dlls/*/*.ncb
