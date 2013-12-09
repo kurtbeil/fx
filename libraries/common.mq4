@@ -9,6 +9,24 @@ int GetExecuteId() {
 	return(StrToInteger(ObjectDescription("ExecuteId")));
 }
 
+
+int SetExecuteId(int ExecuteId) {
+	// 是在没有办法由于 MQL4 的全局变量在不同的文件里调用有不同的拷贝,导致无法将ExecuteId存放在一个普通的全局变量中,
+	// 使用GlobalVariableGet 也达不到目的因为该变量的范围是整个MT4程序的所有窗口
+	// 使用Cpp库也解决不了这个问题，因为调用Cpp库首先要解决唯一调用标识的问题
+	// 所有最终的解决方法,使用MQL4是的Object相关函数,这样的解决方法并不干净,其他EA和Indicator可能会对此造成干扰,在界面上
+	// 也存在删除这个对象的可能，但没有办法这是目前知道的唯一解决办法。	
+	ObjectCreate("ExecuteId", OBJ_LABEL, 0, 0, 0);
+	ObjectSetText("ExecuteId",DoubleToStr(ExecuteId,0) , 10, "Times New Roman", Red);
+	ObjectSet("ExecuteId", OBJPROP_YDISTANCE, 15);
+	ObjectSet("ExecuteId", OBJPROP_XDISTANCE, 5);
+}
+
+
+
+// ****************************    注意  *******************************
+// ***** 该函数已弃用目前使用Python调用服务段程序生成这个ID，确保绝对不会重复 
+// ****************************    注意  *******************************
 void GenerateExecuteId() {
 	// 目前暂用系统时间作为ExecuteId这存在重复的可能性
 	// 该方法基于考虑:在同一秒时间内同时在一个客户端内执行两个不同的EA或者指标的可能性几乎为0
@@ -43,11 +61,145 @@ void GenerateExecuteId() {
 	ObjectSet("ExecuteId", OBJPROP_XDISTANCE, 5);
 }
 
+
+void SetMainExpertName(string MainExpertName) {
+	CppGlobalStringSet("MainExpertName",MainExpertName);
+}
+
 string GetMainExpertName() {
 	return(CppGlobalStringGet("MainExpertName"));
 }
 
+void SetTradingAllowed(bool TradingAllowed){
+	if (TradingAllowed){
+		CppGlobalStringSet("TradingAllowed","True");
+	}else{
+		CppGlobalStringSet("TradingAllowed","False");
+	}
+}
 
+bool GetTradingAllowed(){
+	string TradingAllowed = CppGlobalStringGet("TradingAllowed");
+	if (TradingAllowed=="True") {
+		return(true);
+	}else{
+		return(false);
+	}	
+}
+
+void SetAccountTypeName(string AccountTypeName){	
+	CppGlobalStringSet("AccountTypeName",AccountTypeName);
+}
+
+string GetAccountTypeName(){	
+	return(CppGlobalStringGet("AccountTypeName"));
+}
+
+
+void SetLotSize(double LotSize){
+	CppGlobalStringSet("LotSize",DoubleToStr(LotSize,5));
+}
+
+double GetLotSize(){
+	return(StrToDouble(CppGlobalStringGet("LotSize")));
+}
+
+void SetToken(string Token){
+	CppGlobalStringSet("Token",Token);
+}
+
+
+string GetToken(){
+	CppGlobalStringGet("Token");
+}
+
+
+bool Initialized = false;
+bool IsInitialized(){
+	return (Initialized);
+}
+
+
+void OnInitBegin(string MainExpertName) {	
+	
+	// 调用expert注册服务
+	string response = CppPyExpertRegistr(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
+	Print("response=",response);
+	string errcode = CppPyReadDictValueStr(response,"errcode");
+	// 读取返回值
+	if (errcode != "0") {
+		// 初始化失败 ... ...
+		Print("initial operation fail(1)");
+		return;
+	}
+	
+	// 读取ExecuteId
+	string ExecuteId = CppPyReadDictValueStr(response,"data/ExpertInstanceId");
+	string ExecuteId_t = CppPyReadDictValueType(response,"data/ExpertInstanceId");
+	if ( ExecuteId == "None" || ExecuteId_t != "int" ){
+		// 初始化失败 ... ... 
+		Print("initial operation fail(2)");
+		return;
+	}	
+	SetExecuteId(StrToInteger(ExecuteId));
+	
+	// *********************************** 注意 ******************************************
+	// 在SetExecuteId(StrToInteger(ExecuteId)); 之前 CppGlobalStringSet 和 CppGlobalStringGet是无法调用的     * 
+	// 所以之前是不能调用SetMainExpertName                                                                                          *
+	// *********************************** 注意 ******************************************
+	SetMainExpertName(MainExpertName);
+	
+	// 检查帐号是否允许交易
+	string  TradingAllowed = CppPyReadDictValueStr(response,"data/TradingAllowed");
+	string  TradingAllowed_t = CppPyReadDictValueType(response,"data/TradingAllowed");
+	if ( TradingAllowed == "None" || TradingAllowed_t != "bool" ){
+		// 初始化失败 ... ... 
+		Print("initial operation fail(3)");
+		return;
+	}
+	if (TradingAllowed == "True"){
+		SetTradingAllowed(true);
+	}else{
+		SetTradingAllowed(false);
+	}	
+	
+	// 读取帐号类型
+	string  AccountTypeName = CppPyReadDictValueStr(response,"data/AccountTypeName");
+	string  AccountTypeName_t = CppPyReadDictValueType(response,"data/AccountTypeName");
+	if ( StringLen(AccountTypeName) ==0 ||AccountTypeName_t != "unicode" ){
+		// 初始化失败 ... ... 
+		Print("initial operation fail(4)");
+		return;
+	}
+	SetAccountTypeName(AccountTypeName);
+		
+	// 读取头寸大小
+	string  LotSize = CppPyReadDictValueStr(response,"data/LotSize");
+	string  LotSize_t = CppPyReadDictValueType(response,"data/LotSize"); 
+	if ( LotSize == "None" || ( LotSize_t != "float" && LotSize_t != "int" )){
+		// 初始化失败 ... ... 
+		Print("initial operation fail(5)");
+		return;
+	}
+	SetLotSize(StrToDouble(LotSize));
+	
+	// 读取用于向服务器发送状态报告的令牌
+	string  Token = CppPyReadDictValueStr(response,"data/Token");
+	string  Token_t = CppPyReadDictValueType(response,"data/Token"); 
+	if ( Token == "None" || Token_t != "unicode" ){
+		// 初始化失败 ... ... 
+		Print("initial operation fail(6)");
+		return;
+	}
+	SetToken(Token);
+
+	// 初始化成功
+	Initialized = true;
+	
+}
+
+
+// 近距离限价单过程
 void ProcessLimitOrder() {
 	int count = CppGetLimitOrderCount() ;
 	for(int i = 0; i < count; i++) {
@@ -66,15 +218,7 @@ void ProcessLimitOrder() {
 	}
 }
 
-
-void OnInitBegin(string MainExpertName) {
-	//GlobalVariableSet("ExecuteId",GenerateExecuteId());
-	GenerateExecuteId();
-	CppGlobalStringSet("MainExpertName",MainExpertName);
-}
-
 // 我们希望增加以下函数来为EA增加诸如导出数据的能力，但是如果是调用者是指标而不是EA要怎么处理?
-// 以下函数开发暂缓
 
 void OnInitEnd() {
 
@@ -85,10 +229,11 @@ void OnStartBegin() {
 
 }
 
-
 void OnStartEnd() {
 	ProcessLimitOrder();
 }
+
+
 
 
 void OnDeinitBegin() {

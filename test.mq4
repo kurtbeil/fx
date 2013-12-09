@@ -11,24 +11,43 @@
 
 int init() {
 	OnInitBegin(WindowExpertName());
+	// 读取相关参数
+		
 	
-	double p1 = Ask-Point*50;
-	double p2 = Bid+Point*50;
-	
-	CppCreateLimitOrder(Symbol(),OP_BUY,p1,0.1,TimeCurrent()+5*60);	
-	CppCreateLimitOrder(Symbol(),OP_SELL,p2,0.1,TimeCurrent()+5*60);		
-	
-	return(0);
+	OnInitEnd();
 }
 
 int deinit(){	
+	OnDeinitBegin();
+	
 	OnDeinitEnd();
+}
+
+
+void CheckForOpen(){
+	// ... ... 
+	Print("CheckForOpen() is called ,LotsSize=",GetLotSize());
+	
+}
+
+void CheckForClose(){
+	// ... ... 
+	Print("CheckForClose() is called ");
 }
 
 void start()
 {
-	OnStartBegin();
-    // ...
+	// 如果初始化失败，不进行任何动作
+	if(!IsInitialized()) return;
+	// start() begin 
+	OnStartBegin();	
+	
+	if (GetTradingAllowed()){
+		CheckForOpen();
+	}
+	CheckForClose();		
+	
+	// start() end    
 	OnStartEnd();	
 }  
 
