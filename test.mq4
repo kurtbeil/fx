@@ -12,7 +12,8 @@
 int init() {
 	OnInitBegin(WindowExpertName());
 	// 读取相关参数
-		
+	double d1 = ConfigGetDouble("bands_period1",-1);
+	Print("d1=",d1);
 	
 	OnInitEnd();
 }
@@ -40,7 +41,10 @@ void start()
 	// 如果初始化失败，不进行任何动作
 	if(!IsInitialized()) return;
 	// start() begin 
-	OnStartBegin();	
+	OnStartBegin();
+	
+	// 判断如果时间周期发生变化重新加载配置参数	
+
 	
 	if (GetTradingAllowed()){
 		CheckForOpen();

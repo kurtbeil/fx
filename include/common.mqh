@@ -20,3 +20,6 @@ string GetAccountTypeName();
 double GetLotSize();
 bool IsInitialized();
 string GetToken();
+double ConfigGetDouble(string path,double df);
+int ConfigGetInt(string path,int df);
+string ConfigGetString(string path,string df);

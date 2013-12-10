@@ -120,11 +120,77 @@ bool IsInitialized(){
 }
 
 
+string PeriodName(){
+	string result = "unknown";
+	int period = Period();
+	if (period == 1)  			result = "M1";
+	if (period == 5)  			result = "M5";
+	if (period == 15)  		result = "M15";
+	if (period == 30)  		result = "M30";
+	if (period == 60)  		result = "H1";
+	if (period == 240)  		result = "H4";
+	if (period == 1440)  		result = "D1";
+	if (period == 10080) 	result = "W1";
+	if (period == 43200) 	result = "MN";	
+	return (result);
+}
+
+
+double ConfigGetDouble(string path,double df){
+	double result;
+	string fullpath = AccountCompany() +"/" + GetAccountTypeName() + "/" + Symbol() + "/" + PeriodName()+ "/" + path;
+	string config = CppGlobalStringGet("config");
+	string value = CppPyReadDictValueStr(config,fullpath);
+	string type = CppPyReadDictValueType(config,fullpath);
+	if ( value == "None" || ( type != "float" && type != "int" ) ){
+		Print("ConfigGetDouble(\"" + fullpath+ "\") : fail! default value \"" + df + "\"  is used ");
+		result = df;
+	}else{
+		result = StrToDouble(value);
+	}
+	return (result);
+}
+
+int ConfigGetInt(string path,int df){
+	int result;
+	string fullpath = AccountCompany() +"/" + GetAccountTypeName() + "/" + Symbol() + "/" + PeriodName()+ "/" + path;
+	string config = CppGlobalStringGet("config");
+	string value = CppPyReadDictValueStr(config,fullpath);
+	string type = CppPyReadDictValueType(config,fullpath);
+	if ( value == "None" || ( type != "int" ) ){
+		Print("ConfigGetInt(\"" + fullpath+ "\") : fail! default value \"" + df + "\"  is used ");
+		result = df;
+	}else{
+		result = StrToInteger(value);
+	}
+	return (result);
+}
+
+string ConfigGetString(string path,string df){
+	string result;
+	string fullpath = AccountCompany() +"/" + GetAccountTypeName() + "/" + Symbol() + "/" + PeriodName()+ "/" + path;
+	string config = CppGlobalStringGet("config");
+	string value = CppPyReadDictValueStr(config,fullpath);
+	string type = CppPyReadDictValueType(config,fullpath);
+	if (  type != "unicode" ){
+		Print("ConfigGetString(\"" + fullpath+ "\") : fail! default value \"" + df + "\"  is used ");
+		result = df;
+	}else{
+		result = value;
+	}
+	return (result);
+}
+
+
 void OnInitBegin(string MainExpertName) {	
+	
+	//*********************************************************************************//
+	//                                                   向服务器发送请求并保存相关信息                                             *//
+	//*********************************************************************************//
 	
 	// 调用expert注册服务
 	string response = CppPyExpertRegistr(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
-	Print("response=",response);
+	//Print("response=",response);
 	string errcode = CppPyReadDictValueStr(response,"errcode");
 	// 读取返回值
 	if (errcode != "0") {
@@ -191,11 +257,19 @@ void OnInitBegin(string MainExpertName) {
 		Print("initial operation fail(6)");
 		return;
 	}
-	SetToken(Token);
+	SetToken(Token);		
+	
+	//*********************************************************************************//
+	//                                                   读取配置文件存储在存储中                                                       *//
+	//*********************************************************************************//
+	string filename = TerminalPath( ) + "\\experts\\config\\pycfg\\" + MainExpertName + ".py";		
+	string config = CppPyConfigReadFile(filename);
+	//Print(config);
+	CppGlobalStringSet("config",config);
+	//Print(CppGlobalStringGet("config"));
 
 	// 初始化成功
-	Initialized = true;
-	
+	Initialized = true;	
 }
 
 

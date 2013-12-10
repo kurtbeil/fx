@@ -18,9 +18,5 @@ int deinit(){
 
 
 int start() {	
-	//string response = CppPyExpertRegistr("Scalping",AccountNumber(),AccountCompany(),AccountServer());
-	
-	//Alert("ssss");
-	SendNotification("sss");
-	MessageBox("","","");
+	Print("WindowExpertName=",WindowExpertName());
 }
