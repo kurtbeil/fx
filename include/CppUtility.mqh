@@ -27,6 +27,6 @@ string CppPyConfigReadFile(string file);
 string CppPyReadDictValueType(string dictStr,string path);
 string CppPyReadDictValueStr(string dictStr,string path);
 // 服务访问
-string CppPyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
+string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
 
 

@@ -172,7 +172,8 @@ string ConfigGetString(string path,string df){
 	string config = CppGlobalStringGet("config");
 	string value = CppPyReadDictValueStr(config,fullpath);
 	string type = CppPyReadDictValueType(config,fullpath);
-	if (  type != "unicode" ){
+	if (  type != "unicode" && type != "str" ){
+		//Print("type=",type);
 		Print("ConfigGetString(\"" + fullpath+ "\") : fail! default value \"" + df + "\"  is used ");
 		result = df;
 	}else{
@@ -187,11 +188,12 @@ void OnInitBegin(string MainExpertName) {
 	//*********************************************************************************//
 	//                                                   向服务器发送请求并保存相关信息                                             *//
 	//*********************************************************************************//
-	
+	//Print("MainExpertName=",MainExpertName);
 	// 调用expert注册服务
-	string response = CppPyExpertRegistr(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
+	string response = CppPyExpertRegister(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
+	response = CppPyExpertRegister(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
 	//Print("response=",response);
-	string errcode = CppPyReadDictValueStr(response,"errcode");
+	string errcode = CppPyReadDictValueStr(response,"errcode");	
 	// 读取返回值
 	if (errcode != "0") {
 		// 初始化失败 ... ...
@@ -263,10 +265,18 @@ void OnInitBegin(string MainExpertName) {
 	//                                                   读取配置文件存储在存储中                                                       *//
 	//*********************************************************************************//
 	string filename = TerminalPath( ) + "\\experts\\config\\pycfg\\" + MainExpertName + ".py";		
-	string config = CppPyConfigReadFile(filename);
+	string config = CppPyConfigReadFile(filename);	
+	
+	for(int i=0;i<100;i++){
+		config = CppPyConfigReadFile(filename);	
+	}
+	Print("-------100 finished-----");
+	
 	//Print(config);
 	CppGlobalStringSet("config",config);
 	//Print(CppGlobalStringGet("config"));
+
+
 
 	// 初始化成功
 	Initialized = true;	

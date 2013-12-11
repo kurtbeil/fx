@@ -16,4 +16,4 @@ LIBRARY CppUtility
 		 PyConfigReadFile
 		 PyReadDictValueStr
 		 PyReadDictValueType
-		 PyExpertRegistr
+		 PyExpertRegister

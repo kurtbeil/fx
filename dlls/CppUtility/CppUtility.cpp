@@ -60,11 +60,15 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 {
 	//char logMsg[1204];	
 	
+	
 	switch (ul_reason_for_call)
 	{
 		case DLL_PROCESS_ATTACH:
 			// 初始化python运行环境
-			Py_Initialize();
+			//Py_Initialize();
+		    //PyEval_InitThreads();			
+
+
 			// 初始化临界区变量
 			InitializeCriticalSection(&_StringParameter);
 			InitializeCriticalSection(&_GenerateExecuteId);
@@ -76,8 +80,9 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:			
 		case DLL_PROCESS_DETACH:
-			// 清理python运行环境			
-			Py_Finalize();	
+			// 清理python运行环境	
+			//PyGILState_Ensure();
+			//Py_Finalize();	
 			break;
     }
 	/*
@@ -415,6 +420,8 @@ char * PyConfigReadFile(char* file){
     __declspec( thread ) static char * buf=NULL;
 	
 	LockCS(&_PythonCall);  // 锁定python调用锁
+	Py_Initialize();
+	//PyGILState_STATE gstate = PyGILState_Ensure();    // 获得 GIL
 	__try{
 		int i=0;
 		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
@@ -473,6 +480,8 @@ char * PyConfigReadFile(char* file){
 		ClearPyRef(pol,i);
 	
 	}__finally{
+		//PyGILState_Release(gstate);   // 释放GIL
+		Py_Finalize();
 		UnlockCS(&_PythonCall);       // 解开python调用锁
 	}
 	return(buf);
@@ -483,6 +492,8 @@ char * PyReadDictValueStr(char * dictStr,char * path){
     __declspec( thread ) static char * buf = NULL;
 
 	LockCS(&_PythonCall);  // 锁定python调用锁
+	Py_Initialize();
+	//PyGILState_STATE gstate = PyGILState_Ensure();    // 获得 GIL
 	__try{
 		int i=0;
 		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
@@ -540,6 +551,8 @@ char * PyReadDictValueStr(char * dictStr,char * path){
 		ClearPyRef(pol,i);	
 	
 	}__finally{
+		//PyGILState_Release(gstate);   // 释放GIL
+		Py_Finalize();
 		UnlockCS(&_PythonCall);       // 解开python调用锁
 	}
 	return(buf);
@@ -551,6 +564,8 @@ char * PyReadDictValueType(char * dictStr,char * path){
 	__declspec( thread ) static char * buf = NULL;	
     
 	LockCS(&_PythonCall);  // 锁定python调用锁
+	Py_Initialize();
+	//PyGILState_STATE gstate = PyGILState_Ensure();    // 获得 GIL
 	__try{
 
 		int i=0,j,len;
@@ -616,6 +631,8 @@ char * PyReadDictValueType(char * dictStr,char * path){
 		ClearPyRef(pol,i);		
 
 	}__finally{
+		//PyGILState_Release(gstate);   // 释放GIL
+		Py_Finalize();
 		UnlockCS(&_PythonCall);       // 解开python调用锁
 	}
 	return(buf);
@@ -625,12 +642,13 @@ char * PyReadDictValueType(char * dictStr,char * path){
 --       python访问服务器端相关功能           --
 -----------------------------------------------*/
 
-char * PyExpertRegistr(char * ExpertCode,char * AccountLoginId,char * AccountCompanyName,char * AccountServerName){
-	__declspec( thread ) static char * buf = NULL;
+char * PyExpertRegister(char * ExpertCode,char * AccountLoginId,char * AccountCompanyName,char * AccountServerName){
+	__declspec( thread ) static char * buf = NULL;    
 
-	LockCS(&_PythonCall);  // 锁定python调用锁
-	__try{
-
+	LockCS(&_PythonCall);  // 锁定python调用锁	
+	Py_Initialize();
+	//PyGILState_STATE gstate = PyGILState_Ensure();    // 获得 GIL	
+	__try{		
 		int i=0;
 		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
 		char * pStr=NULL;
@@ -687,7 +705,11 @@ char * PyExpertRegistr(char * ExpertCode,char * AccountLoginId,char * AccountCom
 		ClearPyRef(pol,i);	
 
 	}__finally{
-		UnlockCS(&_PythonCall);       // 解开python调用锁
+		//PyGILState_Release(gstate);   // 释放GIL
+		Py_Finalize();
+		UnlockCS(&_PythonCall);       // 解开python调用锁 
 	}
 	return(buf);	
+	
+
 }

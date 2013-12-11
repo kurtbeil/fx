@@ -27,7 +27,7 @@ string PyReadDictValueStr(string dictStr,string path);
 string PyReadDictValueType(string dictStr,string path);
 
 // expert注册
-string PyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
+string PyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
 
 
 // 生成ExecuteId
@@ -161,8 +161,8 @@ string CppPyReadDictValueStr(string dictStr,string path){
 }
 
 // expert 注册
-string CppPyExpertRegistr(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName){
-    string result = PyExpertRegistr(ExpertCode,AccountLoginId,AccountCompanyName,AccountServerName);
+string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName){
+    string result = PyExpertRegister(ExpertCode,AccountLoginId,AccountCompanyName,AccountServerName);
 	return (result);
 }
 

@@ -110,7 +110,7 @@ int test_PyCconfigRead(){
 int test_PyCallService(){
 	
 	// 这时个一定存在的帐户
-	string response = CppPyExpertRegistr("Scalping","100646","HF Markets Ltd","HFMarkets-Live Server");
+	string response = CppPyExpertRegister("Scalping","100646","HF Markets Ltd","HFMarkets-Live Server");
 	//Print("response=",response);
 		
 	string errcode = CppPyReadDictValueType(response,"errcode");
