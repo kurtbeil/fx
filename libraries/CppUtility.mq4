@@ -28,6 +28,7 @@ string PyReadDictValueType(string dictStr,string path);
 
 // expert注册
 string PyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
+string PyExpertUnregister(string ExpertInstanceId,string Token);
 
 
 // 生成ExecuteId
@@ -165,6 +166,13 @@ string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string Accoun
     string result = PyExpertRegister(ExpertCode,AccountLoginId,AccountCompanyName,AccountServerName);
 	return (result);
 }
+
+
+string CppPyExpertUnregister(string ExecuteId,string Token){
+    string result = PyExpertUnregister(ExecuteId,Token);
+	return (result);
+}
+
 
 // 在配置数据中读取一个浮点数
 /*

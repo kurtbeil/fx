@@ -209,10 +209,11 @@ double getLots() {
 
 
 void LoadTradingConfig(){
-
+	int i;
+	
     // 从配置文件中读取参数
 	bands_period = ConfigGetDouble("bands_period",bands_period);
-	bands_deviation = ConfigGetDouble("bands_deviation",bands_period);	
+	bands_deviation = ConfigGetDouble("bands_deviation",bands_deviation);	
 	bands_wide_min = ConfigGetDouble("bands_wide_min",bands_wide_min);
 	bands_wide_max = ConfigGetDouble("bands_wide_max",bands_wide_max);
 	position_interval = ConfigGetDouble("position_interval",position_interval); 
@@ -225,7 +226,7 @@ void LoadTradingConfig(){
 	limit_order_price_gap = ConfigGetDouble("limit_order_price_gap",limit_order_price_gap); 
 	limit_order_living_time = ConfigGetDouble("limit_order_living_time",limit_order_living_time); 
 	trading_length = ConfigGetDouble("trading_length",trading_length); 
-	for(int i=0;i<24;i++){
+	for(i=0;i<24;i++){
 		long_trading_hours[i] = ConfigGetDouble("long_trading_hours/"+i,long_trading_hours[i]);
 		short_trading_hours[i] = ConfigGetDouble("short_trading_hours/"+i,short_trading_hours[i]);	
 	}
@@ -234,24 +235,57 @@ void LoadTradingConfig(){
 	long_sl_size =  StandardPointSize() *  long_sl_pts;
 	short_tp_size = StandardPointSize() * short_tp_pts;
 	short_sl_size = StandardPointSize() * short_sl_pts;
+	
+	// 打印所有参数
+	Print("bands_period=",bands_period);
+	Print("bands_deviation=",bands_deviation);
+	Print("bands_wide_min=",bands_wide_min);
+	Print("bands_wide_max=",bands_wide_max);
+	Print("position_interval=",position_interval);
+	Print("long_tp_pts=",long_tp_pts);
+	Print("long_sl_pts=",long_sl_pts);
+	Print("short_tp_pts=",short_tp_pts);
+	Print("short_sl_pts=",short_sl_pts);
+	Print("max_long_position=",max_long_position);
+	Print("max_short_position=",max_short_position);
+	Print("limit_order_price_gap=",limit_order_price_gap);
+	Print("limit_order_living_time=",limit_order_living_time);
+	Print("trading_length=",trading_length);
+	
+	for(i=0; i<24; i++){
+		Print("long_trading_hours["+i+"]=",long_trading_hours[i]);
+	}
+	for(i=0; i<24; i++){
+		Print("short_trading_hours["+i+"]=",short_trading_hours[i]);
+	}
+	
 }
 
 
 int init() {
 	// 调用init()开始事件	
 	OnInitBegin(WindowExpertName());
+	// 如果初始化失败不做后续动作
+	if(!IsInitialized()){
+		return;
+	}	
+	
+	// 设置magic
 	magic = GetExecuteId();
-	
-	// 读取相关参数
-	LoadTradingConfig();
-	
+		
+	// 如果初始化成功，才读取相关参数
+	LoadTradingConfig();	
+		
 	// 调用init()结束事件
 	OnInitEnd();
 }
 
 
 int deinit(){	
-    Print("deinit is call");
+	// 如果初始化失败，不进行任何动作
+	if(!IsInitialized()){
+		return;
+	}	
 	// 调用deinit()开始事件
 	OnDeinitBegin();
 	
@@ -264,7 +298,9 @@ int deinit(){
 void start()
 {	
 	// 如果初始化失败，不进行任何动作
-	if(!IsInitialized()) return;
+	if(!IsInitialized()) {
+		return;
+	}
 		
 	// 发送start()开始事件
 	OnStartBegin();

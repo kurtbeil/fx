@@ -110,7 +110,7 @@ void SetToken(string Token){
 
 
 string GetToken(){
-	CppGlobalStringGet("Token");
+	return (CppGlobalStringGet("Token"));
 }
 
 
@@ -194,6 +194,7 @@ void OnInitBegin(string MainExpertName) {
 	response = CppPyExpertRegister(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());
 	//Print("response=",response);
 	string errcode = CppPyReadDictValueStr(response,"errcode");	
+	//Print("errcode=",errcode);
 	// 读取返回值
 	if (errcode != "0") {
 		// 初始化失败 ... ...
@@ -259,25 +260,17 @@ void OnInitBegin(string MainExpertName) {
 		Print("initial operation fail(6)");
 		return;
 	}
+	//Print("Token=",Token);
+	
 	SetToken(Token);		
 	
 	//*********************************************************************************//
 	//                                                   读取配置文件存储在存储中                                                       *//
 	//*********************************************************************************//
 	string filename = TerminalPath( ) + "\\experts\\config\\pycfg\\" + MainExpertName + ".py";		
-	string config = CppPyConfigReadFile(filename);	
-	
-	for(int i=0;i<100;i++){
-		config = CppPyConfigReadFile(filename);	
-	}
-	Print("-------100 finished-----");
-	
-	//Print(config);
+	string config = CppPyConfigReadFile(filename);		
 	CppGlobalStringSet("config",config);
-	//Print(CppGlobalStringGet("config"));
-
-
-
+	
 	// 初始化成功
 	Initialized = true;	
 }
@@ -325,11 +318,17 @@ void OnDeinitBegin() {
 }
 
 void OnDeinitEnd() {
-	// 删除所有挂单
+	//  删除所有挂单
 	int count = CppGetLimitOrderCount() ;
 	for(int i = 0; i < count; i++) {
 		CppRemoveLimitOrder();
 	}		
+	//  删除服务器上Expert实例
+	Print("GetExecuteId()=",GetExecuteId());
+	Print("GetToken()=",GetToken());
+	string result = CppPyExpertUnregister(GetExecuteId(),GetToken());
+	Print(result);
+	
 	//  删除调用标识
 	ObjectDelete("ExecuteId");
 }

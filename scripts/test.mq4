@@ -18,5 +18,8 @@ int deinit(){
 
 
 int start() {	
-	Print("WindowExpertName=",WindowExpertName());
+	//Print("WindowExpertName=",WindowExpertName());
+	//Print("StopOut level = ", AccountStopoutLevel());
+	Print("STOPLEVEL= ", MarketInfo(Symbol(),MODE_STOPLEVEL));
+
 }

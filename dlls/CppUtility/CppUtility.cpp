@@ -713,3 +713,76 @@ char * PyExpertRegister(char * ExpertCode,char * AccountLoginId,char * AccountCo
 	
 
 }
+
+
+char * PyExpertUnregister(char * ExpertInstanceId,char * Token){
+	__declspec( thread ) static char * buf = NULL;    
+
+	LockCS(&_PythonCall);  // 锁定python调用锁	
+	Py_Initialize();
+	//PyGILState_STATE gstate = PyGILState_Ensure();    // 获得 GIL	
+	__try{		
+		int i=0;
+		PyObject *pMod,*pFun,*pArgs,*pRes,*pol[50];	
+		char * pStr=NULL;
+
+		if(buf){
+			free(buf);
+			buf = NULL;
+		}
+	
+		// 导入模块
+		pMod = PyImport_ImportModule("fxclient.mt4lib.service");
+		if ( pMod == NULL ) {
+			return (NULL);		
+		}
+		pol[i++] = pMod;
+	
+		// 定位方法
+		pFun = PyObject_GetAttrString(pMod,"expertUnregister");
+		if ( pFun == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);		
+		}
+		pol[i++] = pFun;
+
+		// 邦定参数
+		pArgs = Py_BuildValue("(s,s)",ExpertInstanceId,Token);
+		if ( pArgs == NULL ) {
+			ClearPyRef(pol,i);
+			return (NULL);
+		}
+		pol[i++] = pArgs;
+
+		// 调用方法
+		pRes = PyEval_CallObject(pFun,pArgs);		
+		if ( pRes == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+		pol[i++] = pRes;
+
+		// 获取返回参数
+		PyArg_Parse(pRes,"s",&pStr);
+		if ( pStr == NULL ) {
+			ClearPyRef(pol,i);
+			return(NULL);
+		}
+    
+		// 尝试分配缓冲区，失败返回值为NULL
+		buf = (char*) malloc(strlen(pStr)+1);
+		if (buf){
+			strcpy(buf,pStr);
+		}
+
+		ClearPyRef(pol,i);	
+
+	}__finally{
+		//PyGILState_Release(gstate);   // 释放GIL
+		Py_Finalize();
+		UnlockCS(&_PythonCall);       // 解开python调用锁 
+	}
+	return(buf);	
+	
+
+}

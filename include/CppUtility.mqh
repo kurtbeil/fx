@@ -28,5 +28,6 @@ string CppPyReadDictValueType(string dictStr,string path);
 string CppPyReadDictValueStr(string dictStr,string path);
 // 服务访问
 string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
+string CppPyExpertUnregister(string ExecuteId,string Token);
 
 
