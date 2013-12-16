@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "CppUtility.h"
 #include <Python.h>
+#include <windows.h>
 
 
 // 全局字符串变量的事务锁
@@ -783,6 +784,22 @@ char * PyExpertUnregister(char * ExpertInstanceId,char * Token){
 		UnlockCS(&_PythonCall);       // 解开python调用锁 
 	}
 	return(buf);	
-	
 
 }
+
+
+/*----------------------------------------------
+--                 测试功能                   --
+-----------------------------------------------*/
+int TestSleep(int n){
+	Sleep(n);
+	return(n);
+}
+
+
+
+
+
+
+
+

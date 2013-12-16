@@ -30,4 +30,7 @@ string CppPyReadDictValueStr(string dictStr,string path);
 string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
 string CppPyExpertUnregister(string ExecuteId,string Token);
 
+// 在deinit中可以使用的sleep函数
+void CppTestSleep(int n);
+
 

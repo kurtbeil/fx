@@ -58,6 +58,10 @@ double GetSymbolSlipPoints(string symbol) {
 	return(slip);
 }
 
+double GetSymbolStopLevelSize(string symbol){
+	double stoplevel = MarketInfo(symbol,MODE_STOPLEVEL);
+	return (stoplevel*Point);
+}
 
 
 

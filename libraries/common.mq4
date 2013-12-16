@@ -330,4 +330,13 @@ void OnDeinitEnd() {
 	
 	//  删除调用标识
 	ObjectDelete("ExecuteId");
+	
+	/*
+	for(int j=0;j<50;j++){
+		CppTestSleep(1000);
+		Print("----"+j+"----");
+	}
+	*/
+	
+	
 }

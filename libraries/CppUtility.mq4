@@ -30,6 +30,11 @@ string PyReadDictValueType(string dictStr,string path);
 string PyExpertRegister(string ExpertCode,string AccountLoginId,string AccountCompanyName,string AccountServerName);
 string PyExpertUnregister(string ExpertInstanceId,string Token);
 
+// 测试使用
+// 在deinit函数中mt4的sleep会失效,只能用c写一个
+int TestSleep(int n);
+
+
 
 // 生成ExecuteId
 int CppGenerateExecuteId() {
@@ -171,6 +176,11 @@ string CppPyExpertRegister(string ExpertCode,string AccountLoginId,string Accoun
 string CppPyExpertUnregister(string ExecuteId,string Token){
     string result = PyExpertUnregister(ExecuteId,Token);
 	return (result);
+}
+
+
+void CppTestSleep(int n){
+	TestSleep(n);
 }
 
 

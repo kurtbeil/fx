@@ -13,6 +13,7 @@ bool IsFirstTick();
 int CreatePosition(string symbol,int cmd,double lots);
 void ClosePosition(int ticket);
 double StandardPointSize();
+double GetSymbolStopLevelSize(string symbol);
 int PositionCount(string symbol,int cmd);
 datetime GetLastPositionOpenTime(string symbol,int cmd);
 
