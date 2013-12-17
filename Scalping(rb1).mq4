@@ -135,6 +135,7 @@ void CheckForClose() {
 	int total;
 	int i;
 	bool result;
+	double long_sl_level,long_tp_level,short_sl_level,short_tp_level;
 
     // 读取交易信息(布林带)
 	double bands_high  = iBands(Symbol(),Period(),bands_period,bands_deviation,0,PRICE_CLOSE,MODE_UPPER,1);
@@ -165,16 +166,18 @@ void CheckForClose() {
 				PutTicketCloseQueue(OrderTicket());				
 			}
 			// 如果没有设置止损，设置止损
-			if(OrderStopLoss()==0){				 
-				 if ( Bid - StandardPointSize() * 4 > OrderOpenPrice() - long_sl_size ) {
-					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderOpenPrice() - long_sl_size,OrderTakeProfit(),0);					
+			long_sl_level = OrderOpenPrice() - long_sl_size;
+			if(OrderStopLoss()==0){				
+				 if ( Bid - StandardPointSize() * 4 > long_sl_level ) {
+					result = OrderModify(OrderTicket(),OrderOpenPrice(),long_sl_level,OrderTakeProfit(),0);					
 					Print("OrderModify(OP_BUY,STOP_LOSS)=",result);
 				}
 			}
 			// 如何没有设置止赢，设置止赢
-			if(OrderTakeProfit()==0){
-				 if ( Ask + StandardPointSize() * 4 < OrderOpenPrice() + long_tp_size_by_time ) {
-					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),OrderOpenPrice() + long_tp_size_by_time ,0);
+			long_tp_level = OrderOpenPrice() + long_tp_size_by_time;
+			if(OrderTakeProfit()==0 || OrderTakeProfit() > long_tp_level ){
+				 if ( Ask + StandardPointSize() * 4 < long_tp_level ) {
+					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),long_tp_level ,0);
 					Print("OrderModify(OP_BUY,TASK_PROFIT)=",result);
 				}				 
 			} 
@@ -189,15 +192,18 @@ void CheckForClose() {
 				PutTicketCloseQueue(OrderTicket());				
 			}
 			// 如果没有设置止损，设置止损
+			short_sl_level = OrderOpenPrice() + short_sl_size;
 			if(OrderStopLoss()==0){				 
-				if ( Ask + StandardPointSize() * 4 < OrderOpenPrice() + short_sl_size ) {
-					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderOpenPrice() + short_sl_size,OrderTakeProfit(),0);
+				if ( Ask + StandardPointSize() * 4 < short_sl_size ) {
+					result = OrderModify(OrderTicket(),OrderOpenPrice(),short_sl_size,OrderTakeProfit(),0);
 					Print("OrderModify(OP_SELL,STOP_LOSS)=",result);
 				}
-			}			
-			if(OrderTakeProfit()==0){
-				if ( Bid - StandardPointSize() * 4 > OrderOpenPrice() - short_tp_size_by_time ) {
-					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),OrderOpenPrice() - short_tp_size_by_time ,0);
+			}
+			//  如何没有设置止赢，设置止赢
+			short_tp_level = OrderOpenPrice() - short_tp_size_by_time;
+			if(OrderTakeProfit()==0 || OrderTakeProfit() < short_tp_level){
+				if ( Bid - StandardPointSize() * 4 > short_tp_level ) {
+					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),short_tp_level,0);
 					Print("OrderModify(OP_SELL,TASK_PROFIT)=",result);
 				}
 			}
