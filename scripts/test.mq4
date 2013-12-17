@@ -15,6 +15,11 @@ int deinit(){
 	//OnDeinitEnd();
 }
 
+void test(int a=0){
+	Print("a=",a);	
+}
+
+
 
 
 int start() {	
@@ -34,7 +39,7 @@ int start() {
 		OrderModify(OrderTicket(),OrderOpenPrice(),OrderOpenPrice()-StandardPointSize()*40,OrderTakeProfit(),0);
 	}
 	*/
-	Print("result=",false);
+	test(1);
 		
 
 }

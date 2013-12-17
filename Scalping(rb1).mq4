@@ -49,10 +49,13 @@ double limit_order_living_time = 10;
 // 交易最长时间范围设定(按分钟设定)
 double trading_length = 300;
 
-
+// 
 int  long_trading_hours [24]= {1,1,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,1};
 int  short_trading_hours [24]= {1,1,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,1};
 
+// 
+int reduce_expect_minutes = 30; 
+int reduce_expect_points = 1;
 
 // 多头交易的时间范围
 bool isLongTradingHour() {
@@ -117,19 +120,17 @@ void CheckForOpen() {
 }
 
 
-double getLongTP(int minutes) {
-	int n = minutes/30;
-	double ret =  long_tp_size - n*StandardPointSize();
+double GetLongTPSizeByTime(int minutes) {
+	int n = minutes/reduce_expect_minutes;
+	double ret =  long_tp_size - n*reduce_expect_points*StandardPointSize();
 	return (ret);
 }
 
-double getShortTP(int minutes) {
-	int n = minutes/30;
-	double ret = short_tp_size - n*StandardPointSize();
+double GetShortTPSizeByTime(int minutes) {
+	int n = minutes/reduce_expect_minutes;
+	double ret = short_tp_size - n*reduce_expect_points*StandardPointSize();
 	return(ret);
 }
-
-
 
 void CheckForClose() {
 	int total;
@@ -158,7 +159,7 @@ void CheckForClose() {
 		}			
 		
 		// 尝试关闭多头头寸		
-		double long_tp_size_by_time = getLongTP(minutes);
+		double long_tp_size_by_time = GetLongTPSizeByTime(minutes);
 		if(OrderType() == OP_BUY) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(Bid-OrderOpenPrice(),5) > long_tp_size_by_time ||
@@ -174,7 +175,7 @@ void CheckForClose() {
 				}
 			}
 			// 如何没有设置止赢，设置止赢
-			long_tp_level = OrderOpenPrice() + long_tp_size_by_time;
+			long_tp_level = OrderOpenPrice() + long_tp_size_by_time + StandardPointSize();
 			if(OrderTakeProfit()==0 || OrderTakeProfit() > long_tp_level ){
 				 if ( Ask + StandardPointSize() * 4 < long_tp_level ) {
 					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),long_tp_level ,0);
@@ -184,7 +185,7 @@ void CheckForClose() {
 		}
 		
 		// 尝试关闭空头头寸		
-		double short_tp_size_by_time = getShortTP(minutes);
+		double short_tp_size_by_time = GetShortTPSizeByTime(minutes);
 		if(OrderType() == OP_SELL) {
 			//  检查是否达到盈利或止损条件
 			if ( Round(OrderOpenPrice() - Ask,5) > short_tp_size_by_time ||
@@ -192,7 +193,7 @@ void CheckForClose() {
 				PutTicketCloseQueue(OrderTicket());				
 			}
 			// 如果没有设置止损，设置止损
-			short_sl_level = OrderOpenPrice() + short_sl_size;
+			short_sl_level = OrderOpenPrice() + short_sl_size ;
 			if(OrderStopLoss()==0){				 
 				if ( Ask + StandardPointSize() * 4 < short_sl_size ) {
 					result = OrderModify(OrderTicket(),OrderOpenPrice(),short_sl_size,OrderTakeProfit(),0);
@@ -200,7 +201,7 @@ void CheckForClose() {
 				}
 			}
 			//  如何没有设置止赢，设置止赢
-			short_tp_level = OrderOpenPrice() - short_tp_size_by_time;
+			short_tp_level = OrderOpenPrice() - short_tp_size_by_time - StandardPointSize();
 			if(OrderTakeProfit()==0 || OrderTakeProfit() < short_tp_level){
 				if ( Bid - StandardPointSize() * 4 > short_tp_level ) {
 					result = OrderModify(OrderTicket(),OrderOpenPrice(),OrderStopLoss(),short_tp_level,0);
@@ -255,7 +256,10 @@ void LoadTradingConfig(){
 	for(i=0;i<24;i++){
 		long_trading_hours[i] = ConfigGetDouble("long_trading_hours/"+i,long_trading_hours[i]);
 		short_trading_hours[i] = ConfigGetDouble("short_trading_hours/"+i,short_trading_hours[i]);	
-	}
+	}	
+	reduce_expect_minutes = ConfigGetDouble("reduce_expect_minutes",reduce_expect_minutes); 
+	reduce_expect_points = ConfigGetDouble("reduce_expect_points",reduce_expect_points); 
+	
 	// 将以点差设置的止赢和止损转化为实际价格范围 
 	long_tp_size = StandardPointSize() *  long_tp_pts;
 	long_sl_size =  StandardPointSize() *  long_sl_pts;
@@ -276,14 +280,15 @@ void LoadTradingConfig(){
 	Print("max_short_position=",max_short_position);
 	Print("limit_order_price_gap=",limit_order_price_gap);
 	Print("limit_order_living_time=",limit_order_living_time);
-	Print("trading_length=",trading_length);
-	
+	Print("trading_length=",trading_length);	
 	for(i=0; i<24; i++){
 		Print("long_trading_hours["+i+"]=",long_trading_hours[i]);
 	}
 	for(i=0; i<24; i++){
 		Print("short_trading_hours["+i+"]=",short_trading_hours[i]);
 	}
+	Print("reduce_expect_minutes=",reduce_expect_minutes);
+	Print("reduce_expect_points=",reduce_expect_points);
 	
 }
 
