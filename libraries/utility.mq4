@@ -69,7 +69,7 @@ double GetSymbolStopLevelSize(string symbol){
 // magic 参数需要去掉了 顺带需要修改 scalping.mq4,  GetSlipPoints 也需要修改
 int CreatePosition(string symbol,int cmd,double lots) {
 	int magic = GetExecuteId();
-	int ticket;
+	int ticket = -1;
 	if (cmd==OP_BUY) {
 		ticket = OrderSend(symbol,OP_BUY,lots,Ask,GetSlipPoints(),0,0,"",magic,0,Blue);
 	}
