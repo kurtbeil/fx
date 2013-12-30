@@ -191,7 +191,7 @@ void OnInitBegin(string MainExpertName) {
 	//Print("MainExpertName=",MainExpertName);
 	// 调用expert注册服务
 	string response = CppPyExpertRegister(MainExpertName,AccountNumber(),AccountCompany(),AccountServer());	
-	//Print("response=",response);
+	Print("response=",response);
 	string errcode = CppPyReadDictValueStr(response,"errcode");	
 	//Print("errcode=",errcode);
 	// 读取返回值
